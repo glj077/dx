@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -25,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Main2Activity extends AppCompatActivity implements View.OnClickListener {
-    private Button send_info;
+
     private static final int SEND_REQUEST = 1;
 
     @SuppressLint("HandlerLeak")
@@ -48,9 +49,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         setContentView(R.layout.activity_main2);
-        send_info = (Button) findViewById(R.id.button4);
-        send_info.setOnClickListener(this);
+
 
 
         //打开页面加载
@@ -74,25 +75,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.button4) {
 
-            //发送数据
-            HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", new HttpCallbackListener() {
-                @Override
-                public void onFinish(String response) {
-                    Message msg = Message.obtain();
-                    msg.what = SEND_REQUEST;
-                    msg.obj = response;
-                    handler.sendMessage(msg);
-
-                }
-
-                @Override
-                public void onError(Exception E) {
-
-                }
-            });
-        }
     }
 
     private void parseJSONWITHGSON(String jsonData) throws JSONException {
@@ -107,7 +90,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         ListView list1=(ListView)findViewById(R.id.dxlist);
         Context mContext=this;
         for (int i = 0; i< dataBeans.size(); i++){
-            mData.add(new DX_Device(dataBeans.get(i).getName(),dataBeans.get(i).getIp(),R.mipmap.ic_launcher_round));
+            mData.add(new DX_Device(dataBeans.get(i).getName(),dataBeans.get(i).getIp(),R.mipmap.earth_foreground));
 
         }
         DXDeviceAdapter DXAdapter=new DXDeviceAdapter((LinkedList<DX_Device>)mData,mContext);
