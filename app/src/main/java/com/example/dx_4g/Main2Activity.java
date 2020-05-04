@@ -90,7 +90,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         ListView list1=(ListView)findViewById(R.id.dxlist);
         Context mContext=this;
         for (int i = 0; i< dataBeans.size(); i++){
-            mData.add(new DX_Device(dataBeans.get(i).getName(),dataBeans.get(i).getIp(),R.mipmap.earth_foreground));
+            mData.add(new DX_Device("设备名称:"+dataBeans.get(i).getName(),"IP地址:"+dataBeans.get(i).getIp(),R.mipmap.earth_foreground));
 
         }
         DXDeviceAdapter DXAdapter=new DXDeviceAdapter((LinkedList<DX_Device>)mData,mContext);
