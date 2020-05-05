@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,44 +65,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         setContentView(R.layout.activity_main);
-        sendRequest = (Button) findViewById(R.id.send_request);
-        send=(Button)findViewById(R.id.button3);
-        responseText = (TextView) findViewById(R.id.response_text);
-        sendRequest.setOnClickListener(this);
-        send.setOnClickListener(this);
+
+
 
 
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.send_request) {
-            // sendRequestWithHttpURLConnection();
-            //Toast.makeText(MainActivity.this,"111",Toast.LENGTH_LONG).show();
-            HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", new HttpCallbackListener() {
-                @Override
-                public void onFinish(String response) {
-                    Message message = Message.obtain();
-                    message.what = SHOW_RESPONSE;
-                    message.obj = response;
-                    handler.sendMessage(message);
-
-
-                }
-
-                @Override
-                public void onError(Exception E) {
-                    E.printStackTrace();
-                }
-            });
 
         }
-        if (v.getId()==R.id.button3){
-            Intent intent =new Intent(MainActivity.this,Main2Activity.class);
-            startActivity(intent);
-        }
-    }
+
 
 //    private void sendRequestWithHttpURLConnection() {
 //        new Thread(new Runnable() {
