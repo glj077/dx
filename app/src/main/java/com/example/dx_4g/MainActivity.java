@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,38 +38,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Base64;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final int SHOW_RESPONSE = 0;
-    private Button sendRequest;
-    private TextView responseText;
-    private  Button send;
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
+    private EditText user;
+    private EditText pas;
 
-            if (msg.what == SHOW_RESPONSE) {
-                String response = (String) msg.obj;
-
-                responseText.setText(response);
-                try {
-                    parseJSONWITHGSON(response);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         setContentView(R.layout.activity_main);
-
+        user=(EditText)findViewById(R.id.user);
+        pas=(EditText)findViewById(R.id.pas);
 
 
 
@@ -75,63 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-
+        String str=user.getText()+":"+pas.getText();
+        String strBase64 = "Basic "+Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
+        Toast.makeText(MainActivity.this,strBase64,Toast.LENGTH_LONG).show();
         }
-
-
-//    private void sendRequestWithHttpURLConnection() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                HttpURLConnection connection = null;
-//                try {
-//                    URL url = new URL("https://api.diacloudsolutions.com/devices");
-//                    connection = (HttpURLConnection) url.openConnection();
-//                    connection.setRequestMethod("GET");
-//                    connection.addRequestProperty("Accept", "application/json");
-//                    connection.addRequestProperty("Content-Type", "application/json");
-//                    connection.addRequestProperty("Authorization", "Basic Z2xqMDc3QHFxLmNvbTpneXd3ODE5Mg==");
-//                    connection.setConnectTimeout(8000);
-//                    connection.setReadTimeout(8000);
-//                    InputStream in = connection.getInputStream();
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-//                    StringBuilder response = new StringBuilder();
-//                    String line;
-//                    while ((line = reader.readLine()) != null) {
-//                        response.append(line);
-//                    }
-//                    Message message = new Message();
-//                    message.what = SHOW_RESPONSE;
-//                    message.obj = response.toString();
-//                    handler.sendMessage(message);
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } finally {
-//                    if (connection != null) {
-//                        connection.disconnect();
-//                    }
-//                }
-//            }
-//        }).start();
-//    }
-
-    private void parseJSONWITHGSON(String jsonData) throws JSONException {
-        JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
-        JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
-
-        Gson gson=new Gson();
-        List<DX_4G.DataBean> dataBeans=gson.fromJson(jsonArray.toString(),new TypeToken<List<DX_4G.DataBean>>() {}.getType());
-          Log.d("glj077"," "+dataBeans.size());
-
-        for (int i = 0; i< dataBeans.size(); i++){
-            Log.d("glj"," "+dataBeans.get(i).getName());
-
-        }
-
-    }
 }
 
 
