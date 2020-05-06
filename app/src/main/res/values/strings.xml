@@ -3,5 +3,5 @@
     <string name="app_name1">中达电通股份有限公司</string>
     <string name="app_name2">DIACloud</string>
     <string name="edittext1">请输入用户名</string>
-    <string name="edittext2">请输入用密码</string>
+    <string name="edittext2">请输入用户密码</string>
 </resources>
