@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class HttpUtil {
-    public static void sendHttpRequest(final String address,final HttpCallbackListener listener){
+    public static void sendHttpRequest(final String address,final String pasBase64,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -19,7 +19,7 @@ public class HttpUtil {
                     connection.setRequestMethod("GET");
                     connection.addRequestProperty("Accept", "application/json");
                     connection.addRequestProperty("Content-Type", "application/json");
-                    connection.addRequestProperty("Authorization", "Basic Z2xqMDc3QHFxLmNvbTpneXd3ODE5Mg==");
+                    connection.addRequestProperty("Authorization", pasBase64);
                     connection.setReadTimeout(8000);
                     connection.setConnectTimeout(8000);
                     //connection.setDoInput(true);

@@ -61,7 +61,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         String str=user.getText()+":"+pas.getText();
         String strBase64 = "Basic "+Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
-        Toast.makeText(MainActivity.this,strBase64,Toast.LENGTH_LONG).show();
+        myApplication application=(myApplication)this.getApplication();
+        application.setPasbas64(strBase64);
+        Intent intent=new Intent(MainActivity.this,Main2Activity.class);
+        startActivity(intent);
         }
 }
 

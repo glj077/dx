@@ -28,7 +28,7 @@ import java.util.List;
 public class Main2Activity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int SEND_REQUEST = 1;
-
+    private myApplication application;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -51,12 +51,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         setContentView(R.layout.activity_main2);
+       application=(myApplication)this.getApplication();
 
 
 
         //打开页面加载
 
-        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", new HttpCallbackListener() {
+        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", application.getPasbas64(),new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
                 Message msg = Message.obtain();

@@ -7,4 +7,6 @@
     <color name="colorappname">#80DEEA</color>
     <color name="colordl">#ffffff</color>
     <color name="colorgra">#D1D5D4</color>
+    <color name="colortitle">#fa5864</color>
+    <color name="bg_toolbar">#32A082</color>
 </resources>
