@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private EditText user;
     private EditText pas;
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         user=(EditText)findViewById(R.id.user);
         pas=(EditText)findViewById(R.id.pas);
+        button=(Button)findViewById(R.id.bottom);
+
 
 
 
@@ -61,10 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         String str=user.getText()+":"+pas.getText();
         String strBase64 = "Basic "+Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
-        myApplication application=(myApplication)this.getApplication();
-        application.setPasbas64(strBase64);
+        myApplication.getInstance().setPasbas64(strBase64);
+        //myApplication application=(myApplication)this.getApplication();
+        //application.setPasbas64(strBase64);
         Intent intent=new Intent(MainActivity.this,Main2Activity.class);
         startActivity(intent);
+
         }
 }
 

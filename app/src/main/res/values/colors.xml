@@ -9,4 +9,6 @@
     <color name="colorgra">#D1D5D4</color>
     <color name="colortitle">#fa5864</color>
     <color name="bg_toolbar">#32A082</color>
+    <color name="tab_text_normal">#283593</color>
+    <color name="tab_text_selected">#64B5F6</color>
 </resources>

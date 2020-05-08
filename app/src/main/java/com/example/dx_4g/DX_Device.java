@@ -1,5 +1,7 @@
-package com.example.dx_4g;
+
 //lsitview显示数据模板定义
+package com.example.dx_4g;
+
 public class DX_Device {
     private String dxName;
     private String dxIp;

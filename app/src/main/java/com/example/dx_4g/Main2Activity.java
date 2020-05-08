@@ -51,13 +51,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
         setContentView(R.layout.activity_main2);
-       application=(myApplication)this.getApplication();
+       //application=(myApplication)this.getApplication();
 
 
 
         //打开页面加载
 
-        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", application.getPasbas64(),new HttpCallbackListener() {
+        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(),new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
                 Message msg = Message.obtain();

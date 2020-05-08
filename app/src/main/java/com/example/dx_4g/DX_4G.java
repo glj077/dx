@@ -1,3 +1,5 @@
+//定义云端数据JSON格式
+
 package com.example.dx_4g;
 
 import java.util.List;
