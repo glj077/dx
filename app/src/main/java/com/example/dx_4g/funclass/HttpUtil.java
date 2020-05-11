@@ -1,6 +1,6 @@
 //云端数据读取
 
-package com.example.dx_4g;
+package com.example.dx_4g.funclass;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

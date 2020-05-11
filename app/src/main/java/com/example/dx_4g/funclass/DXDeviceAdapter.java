@@ -1,4 +1,4 @@
-package com.example.dx_4g;
+package com.example.dx_4g.funclass;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,13 +8,15 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.dx_4g.R;
+
 import java.util.LinkedList;
 
 //定义listView数据适配器
 public class DXDeviceAdapter extends BaseAdapter {
     private Context mContext;
     private LinkedList linkDXDeice;
-    DXDeviceAdapter(LinkedList<DX_Device> linkDXDeice,Context mContext){
+    public DXDeviceAdapter(LinkedList<DX_Device> linkDXDeice, Context mContext){
         this.linkDXDeice=linkDXDeice;
         this.mContext=mContext;
 

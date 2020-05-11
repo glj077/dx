@@ -1,6 +1,6 @@
 //定义云端数据JSON格式
 
-package com.example.dx_4g;
+package com.example.dx_4g.funclass;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.dx_4g;
+package com.example.dx_4g.funclass;
 
 import android.widget.ImageView;
 import android.widget.TextView;
