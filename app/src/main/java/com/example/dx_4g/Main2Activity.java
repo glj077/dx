@@ -8,16 +8,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toolbar;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.Toolbar;
 
+import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
 import com.example.dx_4g.funclass.DXDeviceAdapter;
 import com.example.dx_4g.funclass.DX_4G;
@@ -41,6 +44,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private static final int SEND_REQUEST = 1;
     private myApplication application;
     private SearchView searchView;
+    private DXDeviceAdapter DXAdapter;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -73,27 +77,58 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         //((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTextAlignment("center");
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTitle("设备");
         // 以下动作让标题居中显地
-        TextView textView = (TextView)((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).getChildAt(0);//主标题
+        TextView textView = (TextView) ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
         textView.setGravity(Gravity.CENTER);
         //((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setSubtitle("副标题");
 //        //((Toolbar)findViewById(R.id.toolbar)).setLogo(R.mipmap.ic_launcher);//设置标题LOGO
-      // ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setSubtitleTextColor(Color.WHITE);//设置副标题文本颜色
- //      ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setNavigationIcon(R.mipmap.ic_launcher);//设置导航图标
+        // ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setSubtitleTextColor(Color.WHITE);//设置副标题文本颜色
+        //      ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setNavigationIcon(R.mipmap.ic_launcher);//设置导航图标
 
         //搜索栏设置
-        searchView=(SearchView)findViewById(R.id.search_view);
+        searchView = (SearchView) findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
         searchView.setSubmitButtonEnabled(true);//增加提交按钮
+
+        //注册SearchView监听
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (query.equals(null)) {
+                    Toast.makeText(getApplication(), "请输入查询条件！", Toast.LENGTH_SHORT).show();
+                } else {
+
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+
+        //标题栏中的menu中的按钮监听
+        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_exit:
+                        ActivityCollector.killAllActivity();
+                        break;
+                }
+                return true;
+            }
+        });
 
 
     }
 
 
-
     @Override
     protected void initData() {
-        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(),new HttpCallbackListener() {
+        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
                 Message msg = Message.obtain();
@@ -113,7 +148,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.action_menu,menu);
+        getMenuInflater().inflate(R.menu.action_menu, menu);
         return true;
     }
 
@@ -127,20 +162,25 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
         JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
 
-        Gson gson=new Gson();
-        List<DX_4G.DataBean> dataBeans=gson.fromJson(jsonArray.toString(),new TypeToken<List<DX_4G.DataBean>>() {}.getType());
+        Gson gson = new Gson();
+        List<DX_4G.DataBean> dataBeans = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G.DataBean>>() {
+        }.getType());
 
         LinkedList<DX_Device> mData = new LinkedList<DX_Device>();
-        ListView list1=(ListView)findViewById(R.id.dxlist);
-        Context mContext=this;
-        for (int i = 0; i< dataBeans.size(); i++){
-            mData.add(new DX_Device("设备名称:"+dataBeans.get(i).getName(),"IP地址:"+dataBeans.get(i).getIp(),R.mipmap.earth_foreground));
+        ListView list1 = (ListView) findViewById(R.id.dxlist);
+        Context mContext = this;
+        for (int i = 0; i < dataBeans.size(); i++) {
+            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground));
 
         }
-        DXDeviceAdapter DXAdapter=new DXDeviceAdapter((LinkedList<DX_Device>)mData,mContext);
+         DXAdapter = new DXDeviceAdapter((LinkedList<DX_Device>) mData, mContext);
         list1.setAdapter(DXAdapter);
 
+
+
+
     }
+
 }
 
 
