@@ -31,8 +31,17 @@
         android:theme="?attr/actionBarTheme"
         app:popupTheme="@style/ToolBarPopTheme"
         app:titleTextAppearance="@style/ToolbarTitle"
+        tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="3dp"
-        tools:ignore="MissingConstraints" />
+        tools:layout_editor_absoluteY="3dp" />
+
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/searchView"
+        android:queryHint="请输入查询名称！"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar1"
+        tools:layout_editor_absoluteX="1dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

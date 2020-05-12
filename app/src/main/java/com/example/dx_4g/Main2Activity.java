@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
@@ -39,6 +40,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     private static final int SEND_REQUEST = 1;
     private myApplication application;
+    private SearchView searchView;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -70,17 +72,19 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
         //((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTextAlignment("center");
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTitle("设备");
-
         // 以下动作让标题居中显地
         TextView textView = (TextView)((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
-        textView.setGravity(Gravity.CENTER_HORIZONTAL);//水平居中，CENTER，即水平也垂直
-
-
+        textView.setGravity(Gravity.CENTER);
         //((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setSubtitle("副标题");
 //        //((Toolbar)findViewById(R.id.toolbar)).setLogo(R.mipmap.ic_launcher);//设置标题LOGO
       // ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setSubtitleTextColor(Color.WHITE);//设置副标题文本颜色
  //      ((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar1)).setNavigationIcon(R.mipmap.ic_launcher);//设置导航图标
+
+        //搜索栏设置
+        searchView=(SearchView)findViewById(R.id.search_view);
+        searchView.setIconifiedByDefault(false);
+        searchView.setSubmitButtonEnabled(true);//增加提交按钮
 
 
     }
