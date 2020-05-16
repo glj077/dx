@@ -12,4 +12,7 @@
     <color name="tab_text_normal">#283593</color>
     <color name="tab_text_selected">#64B5F6</color>
     <color name="searchView">#FFEB3B</color>
+    <color name="coloronline">#11C61A</color>
+    <color name="coloronoff">#D8176C</color>
+    <color name="coloronlinetext">#0341EA</color>
 </resources>

@@ -111,7 +111,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 } else {
                    for (int i=0;i<DXAdapter.getCount();i++){
                        if (query_name.equals(mData.get(i).getDxName())){
-                           queryData.add(new DX_Device(mData.get(i).getDxName(),mData.get(i).getDxIp(),R.mipmap.earth_foreground));
+                           queryData.add(new DX_Device(mData.get(i).getDxName(),mData.get(i).getDxIp(),R.mipmap.earth_foreground,mData.get(i).getDxStatus()));
 
                        }
                    }
@@ -199,7 +199,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         //ListView list1 = (ListView) findViewById(R.id.dxlist);
         //Context mContext = this;
         for (int i = 0; i < dataBeans.size(); i++) {
-            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground));
+            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
 
         }
          DXAdapter = new DXDeviceAdapter((LinkedList<DX_Device>) mData, mContext);

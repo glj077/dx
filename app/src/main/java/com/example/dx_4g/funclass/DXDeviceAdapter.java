@@ -1,5 +1,6 @@
 package com.example.dx_4g.funclass;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.dx_4g.R;
 
@@ -38,6 +40,7 @@ public class DXDeviceAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder=null;
@@ -48,6 +51,7 @@ public class DXDeviceAdapter extends BaseAdapter {
             viewHolder.dx_name=(TextView)convertView.findViewById(R.id.DX_name);
             viewHolder.dx_ip=(TextView)convertView.findViewById(R.id.DX_IP);
             viewHolder.dx_icon=(ImageView)convertView.findViewById(R.id.DX_image);
+            viewHolder.dx_status=(TextView)convertView.findViewById(R.id.DX_status);
             convertView.setTag(viewHolder);
         }else{
             viewHolder=(ViewHolder)convertView.getTag();
@@ -55,6 +59,20 @@ public class DXDeviceAdapter extends BaseAdapter {
          viewHolder.dx_name.setText(dx_device.getDxName());
         viewHolder.dx_ip.setText(dx_device.getDxIp());
         viewHolder.dx_icon.setBackgroundResource(dx_device.getDxIcon());
-        return convertView;
+        String dxOnline;
+        if (dx_device.getDxStatus()==0){
+            dxOnline="离线";
+            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.coloronoff));
+
+        }
+        else {
+            dxOnline="在线";
+            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.coloronline));
+            viewHolder.dx_name.setTextColor(convertView.getResources().getColor(R.color.coloronlinetext));
+            viewHolder.dx_ip.setTextColor(convertView.getResources().getColor(R.color.coloronlinetext));
+        }
+        viewHolder.dx_status.setText(dxOnline);
+
+       return convertView;
     }
 }
