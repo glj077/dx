@@ -2,7 +2,6 @@ package com.example.dx_4g;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +44,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private myApplication application;
     private SearchView searchView;
     private DXDeviceAdapter DXAdapter;
+    private DXDeviceAdapter DXAdapter_query;
+    private LinkedList<DX_Device> mData;
+    private List<DX_4G.DataBean> dataBeans;
+    private LinkedList<DX_Device> queryData;
+    private  ListView list1;
+    private  Context mContext;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -63,6 +68,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     };
 
 
+
     @Override
     protected int getLayoutId() {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
@@ -72,6 +78,9 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void initView() {
+         list1 = (ListView) findViewById(R.id.dxlist);
+         mContext = this;
+
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
         //((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTextAlignment("center");
@@ -94,9 +103,23 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                String query_name="设备名称:"+query;
+                queryData = new LinkedList<DX_Device>();
+
                 if (query.equals(null)) {
                     Toast.makeText(getApplication(), "请输入查询条件！", Toast.LENGTH_SHORT).show();
                 } else {
+                   for (int i=0;i<DXAdapter.getCount();i++){
+                       if (query_name.equals(mData.get(i).getDxName())){
+                           queryData.add(new DX_Device(mData.get(i).getDxName(),mData.get(i).getDxIp(),R.mipmap.earth_foreground));
+
+                       }
+                   }
+
+                    DXAdapter_query = new DXDeviceAdapter((LinkedList<DX_Device>) queryData, mContext);
+                    list1.setAdapter(null);
+                    list1.setAdapter(DXAdapter_query);
+
 
                 }
                 return true;
@@ -104,7 +127,13 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+
+                if (newText.isEmpty()){
+                    Toast.makeText(getApplication(),"111",Toast.LENGTH_SHORT).show();
+                    list1.setAdapter(null);
+                    list1.setAdapter(DXAdapter);
+                }
+                return true;
             }
         });
 
@@ -163,12 +192,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
 
         Gson gson = new Gson();
-        List<DX_4G.DataBean> dataBeans = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G.DataBean>>() {
+         dataBeans = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G.DataBean>>() {
         }.getType());
 
-        LinkedList<DX_Device> mData = new LinkedList<DX_Device>();
-        ListView list1 = (ListView) findViewById(R.id.dxlist);
-        Context mContext = this;
+         mData = new LinkedList<DX_Device>();
+        //ListView list1 = (ListView) findViewById(R.id.dxlist);
+        //Context mContext = this;
         for (int i = 0; i < dataBeans.size(); i++) {
             mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground));
 
