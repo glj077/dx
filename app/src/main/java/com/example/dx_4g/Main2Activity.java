@@ -1,10 +1,12 @@
 package com.example.dx_4g;
 
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,12 +47,19 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private myApplication application;
     private SearchView searchView;
     private DXDeviceAdapter DXAdapter;
+    private DXDeviceAdapter DXAdapter_online;
     private DXDeviceAdapter DXAdapter_query;
     private LinkedList<DX_Device> mData;
+    private LinkedList<DX_Device> mData_online;
     private List<DX_4G.DataBean> dataBeans;
     private LinkedList<DX_Device> queryData;
     private  ListView list1;
     private  Context mContext;
+    private int online;
+    private int offline;
+    private TextView dx_count;
+    private TextView dx_show;
+    private int search_view_dx_show;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -79,6 +88,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void initView() {
+
+         dx_show=(TextView)findViewById(R.id.dx_show);
+         dx_count=(TextView)findViewById(R.id.dx_count);
+         dx_show.setOnClickListener(this);
+         dx_count.setOnClickListener(this);
+
          list1 = (ListView) findViewById(R.id.dxlist);
          mContext = this;
 
@@ -98,6 +113,13 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         searchView = (SearchView) findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
         searchView.setSubmitButtonEnabled(true);//增加提交按钮
+       // TextView textView1=searchView.findViewById(android.support.
+        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
+//获取到searchview TextView的控件
+        TextView textView1 = (TextView) searchView.findViewById(id);
+//设置字体大小为14sp
+        textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//14sp
+
 
 
         //注册SearchView监听
@@ -157,6 +179,10 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void initData() {
+        mData_online = new LinkedList<DX_Device>();
+        online=0;
+        offline=0;
+        search_view_dx_show=0;
         HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
@@ -172,6 +198,8 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
             }
         });
+
+
     }
 
 
@@ -184,7 +212,31 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
-
+       if(search_view_dx_show==0){
+           search_view_dx_show=1;
+       }
+       else{search_view_dx_show=0;}
+       switch (v.getId()){
+           case R.id.dx_show:
+               //dx_show.setText(this.getString(R.string.dx_show_online));
+               //dx_count.setText(String.valueOf(online));
+               //break;
+           case R.id.dx_count:
+               if (search_view_dx_show==1){
+               dx_show.setText(this.getString(R.string.dx_show_online));
+               dx_count.setText(String.valueOf(online));
+               DXAdapter_online = new DXDeviceAdapter((LinkedList<DX_Device>) mData_online, mContext);
+               list1.setAdapter(DXAdapter_online);
+               }
+               else{
+                   dx_show.setText(this.getString(R.string.dx_show_all));
+                   dx_count.setText(String.valueOf(offline));
+                   list1.setAdapter(DXAdapter);
+               }
+               break;
+           default:
+               break;
+       }
     }
 
     private void parseJSONWITHGSON(String jsonData) throws JSONException {
@@ -196,14 +248,18 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         }.getType());
 
          mData = new LinkedList<DX_Device>();
-        //ListView list1 = (ListView) findViewById(R.id.dxlist);
-        //Context mContext = this;
         for (int i = 0; i < dataBeans.size(); i++) {
             mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+            if (dataBeans.get(i).getOnline()==1){
+                online=online+1;
+                mData_online.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+            }
 
         }
          DXAdapter = new DXDeviceAdapter((LinkedList<DX_Device>) mData, mContext);
+        offline=dataBeans.size();
         list1.setAdapter(DXAdapter);
+        dx_count.setText(String.valueOf(offline));
 
 
 

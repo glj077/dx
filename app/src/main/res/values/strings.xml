@@ -6,4 +6,6 @@
     <string name="edittext2">请输入用户密码</string>
     <string name="action_device">设备</string>
     <string name="action_exit">退出</string>
+    <string name="dx_show_all">全部</string>
+    <string name="dx_show_online">在线</string>
 </resources>

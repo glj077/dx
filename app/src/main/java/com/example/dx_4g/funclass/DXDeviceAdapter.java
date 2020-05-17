@@ -18,11 +18,13 @@ import java.util.LinkedList;
 public class DXDeviceAdapter extends BaseAdapter {
     private Context mContext;
     private LinkedList linkDXDeice;
+
     public DXDeviceAdapter(LinkedList<DX_Device> linkDXDeice, Context mContext){
         this.linkDXDeice=linkDXDeice;
         this.mContext=mContext;
 
     }
+
 
     @Override
     public int getCount() {
@@ -69,6 +71,7 @@ public class DXDeviceAdapter extends BaseAdapter {
             dxOnline="在线";
             viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.color_online));
             viewHolder.dx_ip.setTextColor(convertView.getResources().getColor(R.color.color_online_text));
+            viewHolder.dx_name.setTextColor(convertView.getResources().getColor(R.color.color_online_text));
         }
         viewHolder.dx_status.setText(dxOnline);
 

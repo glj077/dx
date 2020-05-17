@@ -44,43 +44,42 @@
         android:background="@color/searchView"
         android:queryBackground="@null"
         android:queryHint="请输入查询名称！"
-        app:layout_constraintHorizontal_weight="2"
-        app:layout_constraintRight_toLeftOf="@+id/ll1"
+        app:layout_constraintEnd_toStartOf="@+id/ll1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar1"
         tools:ignore="MissingConstraints" />
 
     <LinearLayout
         android:id="@+id/ll1"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="50dp"
         android:background="@color/color_text_style1"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/search_view"
+
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintLeft_toRightOf="@+id/search_view"
-        app:layout_constraintTop_toTopOf="@+id/search_view"
+        app:layout_constraintStart_toEndOf="@+id/search_view"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar1"
         tools:ignore="MissingConstraints">
 
         <TextView
+            android:id="@+id/dx_show"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="5dp"
             android:gravity="center"
             android:text="全部"
             android:textColor="@color/colordl"
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/dx_count"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
-            android:layout_margin="20sp"
+            android:layout_margin="5dp"
             android:background="@drawable/text_style1"
             android:gravity="center"
-            android:text="100"
             android:textColor="@color/colordl" />
 
     </LinearLayout>
