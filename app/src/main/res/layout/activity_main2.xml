@@ -42,6 +42,7 @@
         android:background="@color/searchView"
         android:queryHint="请输入查询名称！"
         app:layout_constraintTop_toBottomOf="@+id/toolbar1"
+        android:queryBackground="@null"
         tools:layout_editor_absoluteX="1dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

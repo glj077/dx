@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
@@ -83,7 +84,6 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
-        //((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTextAlignment("center");
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).setTitle("设备");
         // 以下动作让标题居中显地
         TextView textView = (TextView) ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1)).getChildAt(0);//主标题
@@ -98,6 +98,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         searchView = (SearchView) findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
         searchView.setSubmitButtonEnabled(true);//增加提交按钮
+
 
         //注册SearchView监听
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -129,7 +130,6 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             public boolean onQueryTextChange(String newText) {
 
                 if (newText.isEmpty()){
-                    Toast.makeText(getApplication(),"111",Toast.LENGTH_SHORT).show();
                     list1.setAdapter(null);
                     list1.setAdapter(DXAdapter);
                 }
