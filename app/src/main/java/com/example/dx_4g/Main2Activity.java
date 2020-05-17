@@ -218,19 +218,32 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
        else{search_view_dx_show=0;}
        switch (v.getId()){
            case R.id.dx_show:
-               //dx_show.setText(this.getString(R.string.dx_show_online));
-               //dx_count.setText(String.valueOf(online));
-               //break;
            case R.id.dx_count:
                if (search_view_dx_show==1){
                dx_show.setText(this.getString(R.string.dx_show_online));
                dx_count.setText(String.valueOf(online));
+               if (!mData_online.isEmpty()){
+                mData_online.clear();}
+
+                   for (int i = 0; i < dataBeans.size(); i++) {
+
+                       if (dataBeans.get(i).getOnline()==1){
+                           mData_online.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+                       }
+
+                   }
+
+
+
+
                DXAdapter_online = new DXDeviceAdapter((LinkedList<DX_Device>) mData_online, mContext);
+               list1.setAdapter(null);
                list1.setAdapter(DXAdapter_online);
                }
                else{
                    dx_show.setText(this.getString(R.string.dx_show_all));
                    dx_count.setText(String.valueOf(offline));
+                   list1.setAdapter(null);
                    list1.setAdapter(DXAdapter);
                }
                break;
@@ -252,7 +265,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
             if (dataBeans.get(i).getOnline()==1){
                 online=online+1;
-                mData_online.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+
             }
 
         }
