@@ -62,14 +62,13 @@ public class DXDeviceAdapter extends BaseAdapter {
         String dxOnline;
         if (dx_device.getDxStatus()==0){
             dxOnline="离线";
-            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.coloronoff));
+            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.color_on_off));
 
         }
         else {
             dxOnline="在线";
-            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.coloronline));
-            viewHolder.dx_name.setTextColor(convertView.getResources().getColor(R.color.coloronlinetext));
-            viewHolder.dx_ip.setTextColor(convertView.getResources().getColor(R.color.coloronlinetext));
+            viewHolder.dx_status.setTextColor(convertView.getResources().getColor(R.color.color_online));
+            viewHolder.dx_ip.setTextColor(convertView.getResources().getColor(R.color.color_online_text));
         }
         viewHolder.dx_status.setText(dxOnline);
 

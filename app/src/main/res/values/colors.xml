@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="color1">#9C27B0</color>
-    <color name="colorappname">#80DEEA</color>
+    <color name="color_appname">#80DEEA</color>
     <color name="colordl">#ffffff</color>
     <color name="colorgra">#D1D5D4</color>
     <color name="colortitle">#fa5864</color>
@@ -12,7 +12,10 @@
     <color name="tab_text_normal">#283593</color>
     <color name="tab_text_selected">#64B5F6</color>
     <color name="searchView">#FFEB3B</color>
-    <color name="coloronline">#11C61A</color>
-    <color name="coloronoff">#D8176C</color>
-    <color name="coloronlinetext">#0341EA</color>
+    <color name="color_online">#11C61A</color>
+    <color name="color_on_off">#D8176C</color>
+    <color name="color_online_text">#0341EA</color>
+    <color name="color_text_style1">#FF6D00</color>
+    <color name="color_circle">#304FFE</color>
+    <color name="color_red">#D50000</color>
 </resources>
