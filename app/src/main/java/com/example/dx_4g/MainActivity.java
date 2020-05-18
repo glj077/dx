@@ -37,6 +37,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void initData() {
 
     }
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+        finish();
+    }
 
     @Override
     public void onClick(View v) {
@@ -45,6 +51,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         myApplication.getInstance().setPasbas64(strBase64);
         Intent intent=new Intent(MainActivity.this,Main2Activity.class);
         startActivity(intent);
+        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+
 
         }
 }

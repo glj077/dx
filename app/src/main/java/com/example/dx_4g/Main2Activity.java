@@ -3,6 +3,7 @@ package com.example.dx_4g;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -168,6 +169,10 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                     case R.id.action_exit:
                         ActivityCollector.killAllActivity();
                         break;
+                    case R.id.action_test:
+                        Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
+                        startActivity(intent);
+                        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
                 }
                 return true;
             }
