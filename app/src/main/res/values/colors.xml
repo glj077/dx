@@ -18,4 +18,7 @@
     <color name="color_text_style1">#FF6D00</color>
     <color name="color_circle">#304FFE</color>
     <color name="color_red">#D50000</color>
+    <color name="colorwhite">#ffffff</color>
+    <color name="clolorTab">#E040FB</color>
+    <color name="colortabf">#CCC7C7</color>
 </resources>

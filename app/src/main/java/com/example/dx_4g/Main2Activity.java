@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -178,9 +179,21 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             }
         });
 
+     //***********************************
+     //为listview没册事件监听
+     //************************************
+     list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+         @Override
+         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+             int deviceID=dataBeans.get(position).getId();
+             Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
+             intent.putExtra("deviceID",deviceID);
+             startActivity(intent);
+         }
+     });
 
     }
-
+    //***********************************//
 
     @Override
     protected void initData() {
@@ -238,9 +251,6 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
                    }
 
-
-
-
                DXAdapter_online = new DXDeviceAdapter((LinkedList<DX_Device>) mData_online, mContext);
                list1.setAdapter(null);
                list1.setAdapter(DXAdapter_online);
@@ -252,6 +262,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                    list1.setAdapter(DXAdapter);
                }
                break;
+           //case
            default:
                break;
        }
