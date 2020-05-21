@@ -26,8 +26,11 @@ import android.widget.Toast;
 
 import com.example.dx_4g.funclass.BaseActivity;
 import com.example.dx_4g.funclass.DXDeviceAdapter;
+import com.example.dx_4g.funclass.DXDeviceRegAdapter;
 import com.example.dx_4g.funclass.DX_4G;
+import com.example.dx_4g.funclass.DX_4G_Reg;
 import com.example.dx_4g.funclass.DX_Device;
+import com.example.dx_4g.funclass.DX_Device_Reg;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.myApplication;
@@ -45,9 +48,9 @@ import java.util.Objects;
 public class Main3Activity extends BaseActivity implements View.OnClickListener {
     private SearchView searchView;
     private static final int SEND_REQUEST = 2;
-    private LinkedList<DX_Device> mData;
-    private List<DX_4G.DataBean> dataBeans;
-    private DXDeviceAdapter DXAdapter;
+    private LinkedList<DX_Device_Reg> mDataReg;
+    private List<DX_4G_Reg.DataBean> dataBeansReg;
+    private DXDeviceRegAdapter DXAdapterReg;
     private ListView list2;
     private Context mContext;
 
@@ -255,16 +258,12 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
         JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
 
         Gson gson = new Gson();
-        dataBeans = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G.DataBean>>() {
+        dataBeansReg = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G_Reg.DataBean>>() {
         }.getType());
 
-        mData = new LinkedList<DX_Device>();
-        for (int i = 0; i < dataBeans.size(); i++) {
-            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
-            if (dataBeans.get(i).getOnline()==1){
-
-
-            }
+        mDataReg = new LinkedList<DX_Device_Reg>();
+        for (int i = 0; i < dataBeansReg.size(); i++) {
+            mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),"IP地址:" + dataBeansReg.get(i).getIp(), R.mipmap.earth_foreground,dataBeansReg.get(i).getOnline()));
 
         }
         DXAdapter = new DXDeviceAdapter((LinkedList<DX_Device>) mData, mContext);
