@@ -41,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +54,7 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
     private DXDeviceRegAdapter DXAdapterReg;
     private ListView list2;
     private Context mContext;
+
 
     //消息处理
     @SuppressLint("HandlerLeak")
@@ -262,15 +264,54 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
         }.getType());
 
         mDataReg = new LinkedList<DX_Device_Reg>();
-        for (int i = 0; i < dataBeansReg.size(); i++) {
-            mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),"IP地址:" + dataBeansReg.get(i).getIp(), R.mipmap.earth_foreground,dataBeansReg.get(i).getOnline()));
+        RegValueHandle(dataBeansReg);
+         TextView regcount=(TextView)findViewById(R.id.reg_count);
+        regcount.setText(String.valueOf(dataBeansReg.size()));
+        DXAdapterReg = new DXDeviceRegAdapter((LinkedList<DX_Device_Reg>) mDataReg, mContext);
 
-        }
-        DXAdapter = new DXDeviceAdapter((LinkedList<DX_Device>) mData, mContext);
-
-        list2.setAdapter(DXAdapter);
-
-
+        list2.setAdapter(DXAdapterReg);
 
     }
+    private  void RegValueHandle(List<DX_4G_Reg.DataBean> RegValue){
+        mDataReg = new LinkedList<DX_Device_Reg>();
+
+        for(int i=0;i<RegValue.size();i++){
+            if(i==RegValue.size()-1){
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),0));
+                break;
+            }
+            if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()==null)){
+                float dx_regvalue=intToFloat(dataBeansReg.get(i+1).getValue(),dataBeansReg.get(i).getValue());
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dx_regvalue),0));
+                i=i+1;
+                continue;
+            }
+
+            if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()!=null)){
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),0));
+                //mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i+1).getName(),String.valueOf(dataBeansReg.get(i+1).getValue()),0));
+
+            }
+
+
+        }
+    }
+    //****************************
+    //整数值转换为浮点数表示形式
+    //****************************
+    private static float intToFloat(int HValue,int LValue){
+        String Hhex= Integer.toHexString(HValue);
+        String Lhex=Integer.toHexString(LValue);
+        String hex=Hhex+Lhex;
+        return Float.intBitsToFloat(new BigInteger(hex, 16).intValue());
+    }
+
+
+    //*****************************
+    //浮点数转换为整数表示形式
+    //*****************************
+    private   static  String folatToHexString(Float value){
+        return  Integer.toHexString(Float.floatToIntBits(value));
+    }
+
 }

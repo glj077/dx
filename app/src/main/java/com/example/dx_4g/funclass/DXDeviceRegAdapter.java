@@ -52,8 +52,8 @@ public class DXDeviceRegAdapter extends BaseAdapter {
             viewHolder=(ViewHolderReg) convertView.getTag();
         }
         viewHolder.reg_name.setText(dx_device_reg.getRegName());
-        viewHolder.reg_value.setText(dx_device_reg.getRegValue());
-        viewHolder.reg_icon.setBackgroundResource(dx_device_reg.getRegIcon());
+        viewHolder.reg_value.setText(String.valueOf(dx_device_reg.getRegValue()));
+        viewHolder.reg_icon.setImageResource(dx_device_reg.getRegIcon());
         return convertView;
     }
 }

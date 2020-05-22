@@ -21,4 +21,5 @@
     <color name="colorwhite">#ffffff</color>
     <color name="clolorTab">#E040FB</color>
     <color name="colortabf">#CCC7C7</color>
+    <color name="colorstack">#FF6D00</color>
 </resources>

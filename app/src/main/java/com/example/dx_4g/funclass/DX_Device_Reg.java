@@ -3,9 +3,9 @@ package com.example.dx_4g.funclass;
 public class DX_Device_Reg {
     private String regName;
     private int regIcon;
-    private int regValue;
+    private String regValue;
     public DX_Device_Reg(){}
-    public DX_Device_Reg(String regName,int regValue,int regIcon){
+    public DX_Device_Reg(String regName,String regValue,int regIcon){
         this.regName=regName;
         this.regValue=regValue;
         this.regIcon=regIcon;
@@ -13,14 +13,14 @@ public class DX_Device_Reg {
     String getRegName(){
         return regName;
     }
-    int getRegValue(){
+    String getRegValue(){
         return regValue;
     }
     int getRegIcon(){return regIcon;}
     public void setRegName(String regName){
         this.regName=regName;
     }
-    public void  setRegValue(int regValue){
+    public void  setRegValue(String regValue){
         this.regValue=regValue;
     }
     public void setRegIcon(int regIcon){this.regIcon=regIcon;}
