@@ -6,67 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Main3Activity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ToolBarPopTheme"
-        app:titleTextAppearance="@style/ToolbarTitle" />
-
-    <SearchView
-        android:id="@+id/search_view1"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:background="@color/searchView"
-        android:queryBackground="@null"
-        android:queryHint="请输入查询名称！"
-        app:layout_constraintEnd_toStartOf="@+id/ll1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-        tools:ignore="MissingConstraints" />
-
-
-    <LinearLayout
-        android:id="@+id/ll1"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-
-        android:background="@color/color_text_style1"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/search_view1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/search_view1"
-        app:layout_constraintTop_toTopOf="@+id/search_view1"
-        tools:ignore="MissingConstraints">
-
-        <TextView
-            android:id="@+id/dx_show"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="5dp"
-            android:gravity="center"
-            android:text="全部"
-            android:textColor="@color/colordl"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/reg_count"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:layout_margin="5dp"
-            android:background="@drawable/text_style1"
-            android:gravity="center"
-            android:textColor="@color/colordl" />
-
-    </LinearLayout>
 
     <TabHost
         android:id="@+id/tab_host"
@@ -119,44 +58,17 @@
         </LinearLayout>
     </TabHost>
 
-    <ListView
-        android:id="@+id/reglist"
-        android:layout_width="409dp"
+
+    <FrameLayout
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:id="@+id/fram"
         app:layout_constraintBottom_toTopOf="@+id/tab_host"
-        android:divider="@color/color1"
-        android:dividerHeight="5px"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        tools:ignore="MissingConstraints,NotSibling,UnknownId"
-        tools:layout_editor_absoluteX="1dp" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:textSize="25sp"
-        android:background="@drawable/text_frame"
-        app:layout_constraintHorizontal_weight="1"
-        android:gravity="center"
-        android:text="地址"
-        app:layout_constraintEnd_toStartOf="@+id/textView2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_view1"
-        tools:ignore="MissingConstraints,UnknownId"
-        tools:layout_editor_absoluteY="106dp" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:text="值"
-        android:textSize="25sp"
-        android:background="@drawable/text_frame"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/search_view1"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

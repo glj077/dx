@@ -186,6 +186,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
          @Override
          public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
              int deviceID=dataBeans.get(position).getId();
+             myApplication.getInstance().setRegID(deviceID);
              Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
              intent.putExtra("deviceID",deviceID);
              startActivity(intent);
