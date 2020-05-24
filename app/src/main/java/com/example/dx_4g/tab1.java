@@ -53,7 +53,8 @@ import java.util.Objects;
 public class tab1 extends Fragment {
    private SearchView searchView;
    private ListView listView;
-   private static int regPosition;
+   private  int regPosition;
+   private  int regsign;
     private static final int SEND_REQUEST = 3;
 
     private LinkedList<DX_Device_Reg> mDataReg;
@@ -69,14 +70,23 @@ public class tab1 extends Fragment {
         View view=inflater.inflate(R.layout.tab1,container,false);
         listView=(ListView)view.findViewById(R.id.reg_list);
         regCount=(TextView)view.findViewById(R.id.reg_count);
+
+        //listview控件点击事件
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //TextView textView=view.findViewById(position).findViewById(R.id.regName);
-                regPosition=position;
+                getRegValue_type(position,mDataReg);
+                Intent intent=new Intent(view.getContext(),Regedit.class);
+                intent.putExtra("regaddr",regPosition);
+                intent.putExtra("regaddrtype",regsign);
+                intent.putExtra("regname",mDataReg.get(position).getRegName());
+                intent.putExtra("regvalue",mDataReg.get(position).getRegValue());
+                startActivity(intent);
 
             }
         });
+
+
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)view.findViewById(R.id.toolbar2);
         toolbar.setTitle("设备");
@@ -89,6 +99,7 @@ public class tab1 extends Fragment {
         TextView textView = (TextView) toolbar.getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
         textView.setGravity(Gravity.CENTER);
+        toolbar.setNavigationIcon(R.drawable.reexit);//设置导航图标
 
         searchView = (SearchView) view.findViewById(R.id.search_view1);
         searchView.setIconifiedByDefault(false);
@@ -99,6 +110,14 @@ public class tab1 extends Fragment {
         TextView textView1 = (TextView) searchView.findViewById(id);
 //设置字体大小为14sp
         textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//14sp
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getContext(),Main2Activity.class);
+                startActivity(intent);
+            }
+        });
 
 
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -169,7 +188,6 @@ public class tab1 extends Fragment {
         Gson gson = new Gson();
         dataBeansReg = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G_Reg.DataBean>>() {
         }.getType());
-        mDataReg = new LinkedList<DX_Device_Reg>();
         RegValueHandle(dataBeansReg);
         regCount.setText(String.valueOf(dataBeansReg.size()));
         mContext = this.getContext();
@@ -184,19 +202,18 @@ public class tab1 extends Fragment {
 
         for(int i=0;i<RegValue.size();i++){
             if(i==RegValue.size()-1){
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),0));
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(),0,0));
                 break;
             }
             if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()==null)){
                 float dx_regvalue=intToFloat(dataBeansReg.get(i+1).getValue(),dataBeansReg.get(i).getValue());
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dx_regvalue),0));
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dx_regvalue),dataBeansReg.get(i).getAddr(),0,1));
                 i=i+1;
                 continue;
             }
 
             if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()!=null)) {
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(), String.valueOf(dataBeansReg.get(i).getValue()), 0));
-                //mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i+1).getName(),String.valueOf(dataBeansReg.get(i+1).getValue()),0));
+                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(), String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(), 0,0));
 
             }
         }
@@ -210,10 +227,11 @@ public class tab1 extends Fragment {
     }
 
 
-    public  static  void setListPosition(RegCallBackListener regCallBackListener){
-        if (regCallBackListener!=null){
-             regCallBackListener.setRegPosition(regPosition);
-        }
+
+
+   private void getRegValue_type(int position,LinkedList<DX_Device_Reg> mDataReg){
+         regPosition=mDataReg.get(position).getRegAddr();
+         regsign=mDataReg.get(position).getRegsign();
 
    }
 
