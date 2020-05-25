@@ -6,6 +6,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dx_4g.funclass.BaseActivity;
+import com.example.dx_4g.funclass.JsonUtil;
+import com.example.dx_4g.funclass.RegValue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class Regedit extends BaseActivity implements View.OnClickListener {
 
@@ -27,6 +34,8 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     private  int regType;
     private  String regName;
     private  String regValue;
+    private  String regValuejsonString;
+    private  EditText userValueEdit;
 
     @Override
     protected int getLayoutId() {
@@ -38,6 +47,9 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     @Override
     protected void initView() {
 
+        userValueEdit=(EditText)findViewById(R.id.editvalueshow);
+
+
         //        //标题栏设置
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
@@ -48,18 +60,6 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
         textView.setGravity(Gravity.CENTER);
 
-        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.home:
-                        finish();
-                        break;
-                }
-                return false;
-            }
-
-        });
 
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +74,40 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         Button exitcancel=(Button)findViewById(R.id.exitcancel);
         exitok.setOnClickListener(this);
         exitcancel.setOnClickListener(this);
+        /****************************************/
+
+        /****************************************/
+        //添加EDITTEXT输入监听
+        userValueEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String editinput=s.toString();
+                switch (regType) {
+                    case 0:
+                    if (!isInteger(editinput)) {
+                        Toast.makeText(Regedit.this, "123", Toast.LENGTH_LONG).show();
+                    }
+                    break;
+                    case 1:
+                        if (!isDouble(editinput)){
+                            Toast.makeText(Regedit.this, "321", Toast.LENGTH_LONG).show();
+                        }
+                }
+            }
+        });
+
+
+        /****************************************/
 
 
 
@@ -86,11 +120,10 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         regType=getIntent().getIntExtra("regaddrtype",0);
         regName=getIntent().getStringExtra("regname");
         regValue=getIntent().getStringExtra("regvalue");
-        TextView textView=(TextView)findViewById(R.id.exitaddrshow);
+        TextView textView=(TextView)findViewById(R.id.editaddrshow);
         textView.setText(regName);
-        EditText editText=(EditText)findViewById(R.id.exitvalueshow);
-        editText.setHint(regValue);
-        Toast.makeText(Regedit.this,regAddr+"   "+regType,Toast.LENGTH_LONG).show();
+        userValueEdit.setHint(regValue);
+
 
 
     }
@@ -98,19 +131,91 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     //按钮事件响应
     @Override
     public void onClick(View v) {
+         String svvalue=userValueEdit.getText().toString();
         switch (v.getId()){
             case R.id.exitok:
+                JsonString(regAddr,regType,svvalue);
+                Toast.makeText(Regedit.this,regValuejsonString,Toast.LENGTH_LONG).show();
                 break;
             case R.id.exitcancel:
                 finish();
                 break;
+
         }
 
     }
     /*****************************************/
+
+    /****************************************/
+    //加载Toolbar的溢出菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.action_menu, menu);
         return true;
     }
+    /*****************************************/
+
+    /*****************************************/
+    //生成JSON格式的字符串
+    private void JsonString(int regAddr_F,int regType_F,String regValue_SV_F){
+        List<RegValue> list = new ArrayList<>() ;
+       switch (regType_F){
+           case 0:
+               RegValue rV=new RegValue();
+               rV.setReg_addr(regAddr_F);
+               rV.setReg_value(Integer.valueOf(regValue_SV_F));
+               list.add(rV);
+               regValuejsonString=JsonUtil.objectToString(list);
+               break;
+           case 1:
+               String strRegValue=folatToHexString(Float.valueOf(regValue_SV_F));
+               String H_Hex=strRegValue.substring(0,4);
+               String L_Hex=strRegValue.substring(4,8);
+               int L_Dec = Integer.parseInt(L_Hex, 16);//16进转十进制
+               int H_Dec=Integer.parseInt(H_Hex, 16);//16进转十进制
+               RegValue rV1=new RegValue();
+               rV1.setReg_addr(regAddr_F);
+               rV1.setReg_value(L_Dec);
+               list.add(rV1);
+               RegValue rV2=new RegValue();
+               rV2.setReg_addr(regAddr_F+1);
+               rV2.setReg_value(H_Dec);
+               list.add(rV2);
+               regValuejsonString=JsonUtil.objectToString(list);
+               break;
+       }
+
+    }
+    /*****************************************/
+
+    /*****************************************/
+    //浮点数转16进制，结果是字符串
+    private   static  String folatToHexString(Float value){
+        return  Integer.toHexString(Float.floatToIntBits(value));
+    }
+    /******************************************/
+
+    /*****************************************/
+    //判断是否为整型数
+    private boolean isInteger(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
+    }
+   /******************************************/
+
+   /******************************************/
+   //判断是否为浮点数
+   // 判断浮点数（double和float）
+    private boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(("^[-\\+]?[.\\d]*$"));
+        return pattern.matcher(str).matches();
+    }
+
+
 }
