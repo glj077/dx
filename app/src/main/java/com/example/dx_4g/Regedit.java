@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -66,6 +67,17 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                 finish();
             }
         });
+
+        /****************************************/
+        //注册按钮事件
+        Button exitok=(Button)findViewById(R.id.exitok);
+        Button exitcancel=(Button)findViewById(R.id.exitcancel);
+        exitok.setOnClickListener(this);
+        exitcancel.setOnClickListener(this);
+
+
+
+
     }
 
     @Override
@@ -82,11 +94,20 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
 
     }
-
+    /*****************************************/
+    //按钮事件响应
     @Override
     public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.exitok:
+                break;
+            case R.id.exitcancel:
+                finish();
+                break;
+        }
 
     }
+    /*****************************************/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.action_menu, menu);
