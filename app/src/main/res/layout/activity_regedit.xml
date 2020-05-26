@@ -62,7 +62,7 @@
             android:gravity="center"
             android:textColor="@color/colorblack"
             android:layout_marginRight="10dp"
-            android:inputType="number|numberDecimal"
+            android:inputType="numberSigned|numberDecimal|numberSigned"
             android:background="@drawable/edittextselect"
             android:id="@+id/editvalueshow" />
     </LinearLayout>

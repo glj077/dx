@@ -65,11 +65,13 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-
+            Toast.makeText(Main2Activity.this,"code:"+myApplication.getInstance().getHttpshowcode()+
+                    " "+"Message:"+myApplication.getInstance().getHttpshowmessage(),Toast.LENGTH_LONG).show();
             if (msg.what == SEND_REQUEST) {
                 String response = (String) msg.obj;
 
                 try {
+
                     parseJSONWITHGSON(response);
 
                 } catch (JSONException e) {
@@ -205,6 +207,8 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
+                myApplication.getInstance().setHttpshowcode(HttpUtil.getHttpshowcode());
+                myApplication.getInstance().setHttpshowmessage(HttpUtil.getHttpshowmessage());
                 Message msg = Message.obtain();
                 msg.what = SEND_REQUEST;
                 msg.obj = response;
@@ -217,7 +221,6 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
             }
         });
-
 
     }
 
@@ -291,9 +294,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         list1.setAdapter(DXAdapter);
         dx_count.setText(String.valueOf(offline));
 
+    }
 
+    @Override
+    protected void onResume() {
 
-
+        super.onResume();
     }
 
 }

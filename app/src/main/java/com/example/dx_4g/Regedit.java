@@ -4,6 +4,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -30,6 +32,8 @@ import java.util.regex.Pattern;
 
 public class Regedit extends BaseActivity implements View.OnClickListener {
 
+    private static final int MIN_INT=-32768;
+    private static final int MAX_INT=32767;
     private  int regAddr;
     private  int regType;
     private  String regName;
@@ -89,20 +93,25 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable s) {
                 String editinput=s.toString();
-                switch (regType) {
-                    case 0:
-                    if (!isInteger(editinput)) {
-                        Toast.makeText(Regedit.this, "123", Toast.LENGTH_LONG).show();
+
+                    switch (regType) {
+                        case 0:
+                            if (isInteger(editinput)) {
+                                if (Integer.parseInt(editinput) < -32768) {
+                                    userValueEdit.setText("-32768");
+                                }
+                                if (Integer.parseInt(editinput) > 32767) {
+                                    userValueEdit.setText("32767");
+                                }
+                            }
+
+                            break;
+
                     }
-                    break;
-                    case 1:
-                        if (!isDouble(editinput)){
-                            Toast.makeText(Regedit.this, "321", Toast.LENGTH_LONG).show();
-                        }
-                }
             }
         });
 
@@ -163,7 +172,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
            case 0:
                RegValue rV=new RegValue();
                rV.setReg_addr(regAddr_F);
-               rV.setReg_value(Integer.valueOf(regValue_SV_F));
+               rV.setReg_value(Integer.parseInt(regValue_SV_F));
                list.add(rV);
                regValuejsonString=JsonUtil.objectToString(list);
                break;
@@ -201,7 +210,8 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         if (null == str || "".equals(str)) {
             return false;
         }
-        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        //Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        Pattern pattern = Pattern.compile("^-?[1-9]\\d*$");
         return pattern.matcher(str).matches();
     }
    /******************************************/
@@ -213,7 +223,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         if (null == str || "".equals(str)) {
             return false;
         }
-        Pattern pattern = Pattern.compile(("^[-\\+]?[.\\d]*$"));
+        Pattern pattern = Pattern.compile("^(-?\\d+)(\\.\\d+)?$");
         return pattern.matcher(str).matches();
     }
 

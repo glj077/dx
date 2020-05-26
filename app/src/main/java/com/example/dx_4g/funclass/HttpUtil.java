@@ -2,6 +2,15 @@
 
 package com.example.dx_4g.funclass;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.example.dx_4g.Main2Activity;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,11 +18,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class HttpUtil {
-    public static void sendHttpRequest(final String address,final String pasBase64,final HttpCallbackListener listener){
+    private static int httpshowcode;
+    private static String httpshowmessage;
+
+    public static  int getHttpshowcode(){
+        return httpshowcode;
+    }
+    public static String getHttpshowmessage(){
+        return httpshowmessage;
+    }
+    public static void sendHttpRequest( final String address, final String pasBase64, final HttpCallbackListener listener){
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-
                 HttpURLConnection connection = null;
                 try {
                     URL url = new URL(address);
@@ -24,32 +42,41 @@ public class HttpUtil {
                     connection.addRequestProperty("Authorization", pasBase64);
                     connection.setReadTimeout(8000);
                     connection.setConnectTimeout(8000);
+                    connection.setUseCaches(false);
                     //connection.setDoInput(true);
                     //connection.setDoOutput(true);
                     InputStream in = connection.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
+                   httpshowcode=connection.getResponseCode();
+                   httpshowmessage=connection.getResponseMessage();
+                    if (connection.getResponseCode() == 200) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            response.append(line);
+                        }
+                        if (listener != null) {
+                            listener.onFinish(response.toString());
+
+                        }
                     }
-                    if (listener!=null){
-                        listener.onFinish(response.toString());
+                    else{
 
                     }
 
+                    } catch(Exception e){
+                        if (listener != null) {
+                            listener.onError(e);
+                        }
 
-                } catch (Exception e) {
-                    if (listener!=null){
-                       listener.onError(e);
+                    } finally{
+                        if (connection != null) {
+                            connection.disconnect();
+                        }
                     }
 
-                } finally {
-                    if (connection != null) {
-                        connection.disconnect();
-                    }
                 }
-            }
+
         }).start();
 
         }
