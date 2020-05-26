@@ -34,14 +34,14 @@ public class HttpUtilPut {
                             response.append(line);
                         }
                         if (listener!=null){
-                            listener.onFinish(response.toString());
+                            listener.onFinish(response.toString(),1);
 
                         }
 
 
                     } catch (Exception e) {
                         if (listener!=null){
-                            listener.onError(e);
+                            listener.onError(1,"12");
                         }
 
                     } finally {

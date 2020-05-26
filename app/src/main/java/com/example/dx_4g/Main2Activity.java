@@ -31,6 +31,7 @@ import com.example.dx_4g.funclass.DX_4G;
 import com.example.dx_4g.funclass.DX_Device;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
+import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -46,6 +47,7 @@ import java.util.Objects;
 public class Main2Activity extends BaseActivity implements View.OnClickListener {
 
     private static final int SEND_REQUEST = 1;
+    private static final int SEND_REQUEST_ERR=2;
     private myApplication application;
     private SearchView searchView;
     private DXDeviceAdapter DXAdapter;
@@ -65,18 +67,20 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            Toast.makeText(Main2Activity.this,"code:"+myApplication.getInstance().getHttpshowcode()+
-                    " "+"Message:"+myApplication.getInstance().getHttpshowmessage(),Toast.LENGTH_LONG).show();
             if (msg.what == SEND_REQUEST) {
                 String response = (String) msg.obj;
+                int showcode=msg.arg1;
 
                 try {
-
+                    //Toast.makeText(Main2Activity.this,"code:"+showcode,Toast.LENGTH_SHORT).show();
                     parseJSONWITHGSON(response);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+            if (msg.what==SEND_REQUEST_ERR){
+                Toast.makeText(Main2Activity.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -199,26 +203,32 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     //***********************************//
 
     @Override
-    protected void initData() {
+    protected void initData()  {
         mData_online = new LinkedList<DX_Device>();
         online=0;
         offline=0;
         search_view_dx_show=0;
         HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
+
             @Override
-            public void onFinish(String response) {
-                myApplication.getInstance().setHttpshowcode(HttpUtil.getHttpshowcode());
-                myApplication.getInstance().setHttpshowmessage(HttpUtil.getHttpshowmessage());
-                Message msg = Message.obtain();
-                msg.what = SEND_REQUEST;
-                msg.obj = response;
-                handler.sendMessage(msg);
+            public void onFinish(String response,int httpcode) {
+                if (httpcode==200) {
+                    Message msg = Message.obtain();
+                    msg.what = SEND_REQUEST;
+                    msg.obj = response;
+                    msg.arg1 = httpcode;
+                    handler.sendMessage(msg);
+                }
 
             }
 
             @Override
-            public void onError(Exception E) {
-
+            public void onError(int httpcode,String httpmessage) {
+                Message msg = Message.obtain();
+                msg.what = SEND_REQUEST_ERR;
+                msg.obj = (Object)httpmessage;
+                msg.arg1=httpcode;
+                handler.sendMessage(msg);
             }
         });
 

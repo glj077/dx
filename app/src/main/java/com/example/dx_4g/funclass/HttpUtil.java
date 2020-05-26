@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.example.dx_4g.Main2Activity;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -27,8 +28,7 @@ public class HttpUtil {
     public static String getHttpshowmessage(){
         return httpshowmessage;
     }
-    public static void sendHttpRequest( final String address, final String pasBase64, final HttpCallbackListener listener){
-
+    public static void sendHttpRequest( final String address, final String pasBase64, final HttpCallbackListener listener)  {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -56,17 +56,24 @@ public class HttpUtil {
                             response.append(line);
                         }
                         if (listener != null) {
-                            listener.onFinish(response.toString());
+                            listener.onFinish(response.toString(),httpshowcode);
 
                         }
                     }
                     else{
+                        if (listener != null) {
+
+                        }
 
                     }
 
                     } catch(Exception e){
                         if (listener != null) {
-                            listener.onError(e);
+                            try {
+                                listener.onError(connection.getResponseCode(),connection.getResponseMessage());
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
                         }
 
                     } finally{

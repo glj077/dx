@@ -143,8 +143,19 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
          String svvalue=userValueEdit.getText().toString();
         switch (v.getId()){
             case R.id.exitok:
-                JsonString(regAddr,regType,svvalue);
-                Toast.makeText(Regedit.this,regValuejsonString,Toast.LENGTH_LONG).show();
+                if (!svvalue.isEmpty()){
+                        if(((regType==0)&&(isInteger(svvalue)))||((regType==1)&&(isDouble(svvalue)))){
+                        JsonString(regAddr, regType, svvalue);
+                        Toast.makeText(Regedit.this, regValuejsonString, Toast.LENGTH_LONG).show();
+                    }
+                        else{
+                            Toast.makeText(Regedit.this,"数值类型错误!",Toast.LENGTH_SHORT).show();
+                        }
+                }else
+                {
+                    Toast.makeText(Regedit.this,"数值不能为空!",Toast.LENGTH_SHORT).show();
+                }
+
                 break;
             case R.id.exitcancel:
                 finish();

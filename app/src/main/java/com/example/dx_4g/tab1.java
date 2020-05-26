@@ -37,6 +37,7 @@ import com.example.dx_4g.funclass.DX_Device_Reg;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.RegCallBackListener;
+import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -138,9 +139,11 @@ public class tab1 extends Fragment {
         });
 
         int devicdID= myApplication.getInstance().getRegID();
-        readRegValue(devicdID);
-
-
+        try {
+            readRegValue(devicdID);
+        } catch (httpopenException e) {
+            e.printStackTrace();
+        }
 
 
         return view;
@@ -163,19 +166,20 @@ public class tab1 extends Fragment {
         }
     };
 
-    private void readRegValue(int deviceID){
+    private void readRegValue(int deviceID) throws httpopenException {
         String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/regs";
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
-            public void onFinish(String response) {
+            public void onFinish(String response,int httpcode) {
                 Message msg = Message.obtain();
                 msg.what = SEND_REQUEST;
                 msg.obj = response;
+                msg.arg1=httpcode;
                 handler.sendMessage(msg);
             }
 
             @Override
-            public void onError(Exception E) {
+            public void onError(int httpcode,String httpmessage) {
 
             }
         });

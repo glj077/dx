@@ -12,11 +12,16 @@ public abstract class BaseActivity extends AppCompatActivity {
        ActivityCollector.addActivity(this);
        //setSupportTollBar();
        initView();
-       initData();
+       try {
+           initData();
+       } catch (httpopenException e) {
+           e.printStackTrace();
+       }
+
    }
    protected abstract int getLayoutId();
    protected abstract void initView();
-   protected abstract void initData();
+   protected abstract void initData() throws httpopenException;
 
     @Override
     protected void onResume() {
