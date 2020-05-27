@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.DXDeviceRegAdapter;
@@ -57,6 +59,7 @@ public class tab1 extends Fragment {
    private  int regPosition;
    private  int regsign;
     private static final int SEND_REQUEST = 3;
+    private static final int SEND_REQUEST_ERR=4;
 
     private LinkedList<DX_Device_Reg> mDataReg;
     private List<DX_4G_Reg.DataBean> dataBeansReg;
@@ -64,6 +67,7 @@ public class tab1 extends Fragment {
     private ListView list2;
     private Context mContext;
     private TextView regCount;
+    private SwipeRefreshLayout mSwipe;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
@@ -83,6 +87,7 @@ public class tab1 extends Fragment {
                 intent.putExtra("regname",mDataReg.get(position).getRegName());
                 intent.putExtra("regvalue",mDataReg.get(position).getRegValue());
                 startActivity(intent);
+                //getActivity().onBackPressed();//关闭fragment tab1
 
             }
         });
@@ -139,11 +144,35 @@ public class tab1 extends Fragment {
         });
 
         int devicdID= myApplication.getInstance().getRegID();
-        try {
             readRegValue(devicdID);
-        } catch (httpopenException e) {
-            e.printStackTrace();
-        }
+
+
+        mSwipe=(SwipeRefreshLayout)view.findViewById(R.id.swipelayout);
+        /*
+         * 设置进度条的颜色
+         * 参数是一个可变参数、可以填多个颜色
+         */
+        mSwipe.setColorSchemeColors(Color.parseColor("#d7a101"),Color.parseColor("#54c745"),Color.parseColor("#f16161"),Color.BLUE,Color.YELLOW);
+        /*
+         * 设置下拉刷新的监听
+         */
+        mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                listView.setAdapter(null);
+                int devicdID= myApplication.getInstance().getRegID();
+                readRegValue(devicdID);
+                mSwipe.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        /*
+                         * 加载完毕之后就关闭进度条
+                         */
+                        mSwipe.setRefreshing(false);
+                    }
+                }, 5000);
+            }
+        });
 
 
         return view;
@@ -158,15 +187,19 @@ public class tab1 extends Fragment {
 
                 try {
                     parseJSONWITHGSON(response);
+                    mSwipe.setRefreshing(false);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+            if (msg.what==SEND_REQUEST_ERR){
+                Toast.makeText(getContext(),"ErrorCode:"+msg.arg1+"  Message:"+(String)msg.obj,Toast.LENGTH_LONG).show();
+            }
         }
     };
 
-    private void readRegValue(int deviceID) throws httpopenException {
+    private void readRegValue(int deviceID) {
         String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/regs";
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
@@ -180,7 +213,11 @@ public class tab1 extends Fragment {
 
             @Override
             public void onError(int httpcode,String httpmessage) {
-
+                Message msg = Message.obtain();
+                msg.what = SEND_REQUEST_ERR;
+                msg.obj = httpmessage;
+                msg.arg1=httpcode;
+                handler.sendMessage(msg);
             }
         });
     }
@@ -238,6 +275,14 @@ public class tab1 extends Fragment {
          regsign=mDataReg.get(position).getRegsign();
 
    }
+
+    @Override
+    public void onResume() {
+        listView.setAdapter(null);
+        int devicdID= myApplication.getInstance().getRegID();
+        readRegValue(devicdID);
+        super.onResume();
+    }
 
 
 }

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.dx_4g.funclass.RegCallBackListener;
 import com.example.dx_4g.tab2;
@@ -65,25 +66,6 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
     private Context mContext;
     private int regID;
 
-    //消息处理
-    //@SuppressLint("HandlerLeak")
-//    private Handler handler = new Handler() {
-//        public void handleMessage(Message msg) {
-//
-//            if (msg.what == SEND_REQUEST) {
-//                String response = (String) msg.obj;
-//
-//                try {
-//                    parseJSONWITHGSON(response);
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    };
-
-
 
     @Override
     protected int getLayoutId() {
@@ -96,41 +78,6 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void initView() {
 
-        //mContext = this.getApplicationContext();
-
-        //View view1=this.getLayoutInflater().inflate(R.id.tab1, null);
-        //list2=(ListView)view1.findViewById(R.id.reg_list);
-
-
-//        //标题栏设置
-//        setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar2));
-//        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
-//        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar2)).setTitle("设备");
-//        // 以下动作让标题居中显地
-//        TextView textView = (TextView) ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar2)).getChildAt(0);//主标题
-//        textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
-//        textView.setGravity(Gravity.CENTER);
-//
-//        //搜索栏设置
-//        searchView = (SearchView) findViewById(R.id.search_view1);
-//        searchView.setIconifiedByDefault(false);
-//        searchView.setSubmitButtonEnabled(true);//增加提交按钮
-//        // TextView textView1=searchView.findViewById(android.support.
-//        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
-////获取到searchview TextView的控件
-//        TextView textView1 = (TextView) searchView.findViewById(id);
-////设置字体大小为14sp
-//        textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//14sp
-
-
-        //标签栏设置
-        //********************************************//
-
-       //初始化，如果类继承TabActivity，则初始化不能使用这个指令
-        //设置标签名称，标签名称和图片不能同时设置，如果不使用自定义格式，可通过以下方法设置标签名或图标
-        //tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator("本地音乐",null).setContent(R.id.tab1));
-        //tabHost.addTab(tabHost.newTabSpec("tab2").setIndicator("网络音乐",null).setContent(R.id.tab2));
-        //tabHost.addTab(tabHost.newTabSpec("tab3").setIndicator("在线音乐",null).setContent(R.id.tab3));
 
         //****************************
         //采用自定义样式设定标签
@@ -249,11 +196,7 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void initData() {
-        //********************************
-        //读取设备ID,并读取网络数据
-        //*******************************
-       // int devicdID=myApplication.getInstance().getRegID();
-        //readRegValue(devicdID);
+
 
     }
 
@@ -271,63 +214,6 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
         return true;
     }
 
-    //******************************
-    //对读取回来的数据进行处理
-    //******************************
-
-//    private void parseJSONWITHGSON(String jsonData) throws JSONException {
-//        JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
-//        JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
-//
-//        Gson gson = new Gson();
-//        dataBeansReg = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G_Reg.DataBean>>() {
-//        }.getType());
-//        list2=findViewById(R.id.reg_list);
-//        mDataReg = new LinkedList<DX_Device_Reg>();
-//        RegValueHandle(dataBeansReg);
-//         TextView regcount=(TextView)findViewById(R.id.reg_count);
-//        regcount.setText(String.valueOf(dataBeansReg.size()));
-//        DXAdapterReg = new DXDeviceRegAdapter((LinkedList<DX_Device_Reg>) mDataReg, mContext);
-//
-//        list2.setAdapter(DXAdapterReg);
-//
-//    }
-    //******************************
-    //对读取回来的数据做进一步的处理
-    //******************************
-//    private  void RegValueHandle(List<DX_4G_Reg.DataBean> RegValue){
-//        mDataReg = new LinkedList<DX_Device_Reg>();
-//
-//        for(int i=0;i<RegValue.size();i++){
-//            if(i==RegValue.size()-1){
-//                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),0));
-//                break;
-//            }
-//            if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()==null)){
-//                float dx_regvalue=intToFloat(dataBeansReg.get(i+1).getValue(),dataBeansReg.get(i).getValue());
-//                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dx_regvalue),0));
-//                i=i+1;
-//                continue;
-//            }
-//
-//            if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()!=null)) {
-//                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(), String.valueOf(dataBeansReg.get(i).getValue()), 0));
-//                //mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i+1).getName(),String.valueOf(dataBeansReg.get(i+1).getValue()),0));
-//
-//            }
-//        }
-//    }
-
-    //****************************
-    //整数值转换为浮点数表示形式
-    //****************************
-//    private static float intToFloat(int HValue,int LValue){
-//        String Hhex= Integer.toHexString(HValue);
-//        String Lhex=Integer.toHexString(LValue);
-//        String hex=Hhex+Lhex;
-//        return Float.intBitsToFloat(new BigInteger(hex, 16).intValue());
-//    }
-
 
     //*****************************
     //浮点数转换为整数表示形式
@@ -335,27 +221,5 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
     private   static  String folatToHexString(Float value){
         return  Integer.toHexString(Float.floatToIntBits(value));
     }
-
-    //*******************************
-    //读取DX云端寄存器数据
-    //********************************
-//    private void readRegValue(int deviceID){
-//        String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/regs";
-//        HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
-//            @Override
-//            public void onFinish(String response) {
-//                Message msg = Message.obtain();
-//                msg.what = SEND_REQUEST;
-//                msg.obj = response;
-//                handler.sendMessage(msg);
-//            }
-//
-//            @Override
-//            public void onError(Exception E) {
-//
-//            }
-//        });
-//    }
-
 
 }

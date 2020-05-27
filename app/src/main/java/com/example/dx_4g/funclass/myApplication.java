@@ -7,8 +7,6 @@ import android.net.IpSecManager;
 public class myApplication extends Application {
     private  static  myApplication mApp;
     private static Context context;
-    private int httpshowcode;
-    private String httpshowmessage;
     private  String pasbas64;
     private int regID;
     public  static myApplication getInstance(){
@@ -23,18 +21,6 @@ public class myApplication extends Application {
     public int getRegID(){return regID;}
     public  void setRegID(int regID){this.regID=regID;}
 
-    public int getHttpshowcode() {
-        return httpshowcode;
-    }
-    public void setHttpshowcode(int httpshowcode){
-        this.httpshowcode=httpshowcode;
-    }
-    public String getHttpshowmessage(){
-        return httpshowmessage;
-    }
-    public void setHttpshowmessage(String httpshowmessage){
-        this.httpshowmessage=httpshowmessage;
-    }
 
     @Override
     public void onCreate() {

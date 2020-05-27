@@ -20,6 +20,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,12 +56,25 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
+            final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.VISIBLE);
             if (msg.what == SEND_QUEST) {
                 String response = (String) msg.obj;
                 int showcode=msg.arg1;
                 try {
                     if (showcode==202) {
-                        Toast.makeText(Regedit.this, "code:" + showcode, Toast.LENGTH_SHORT).show();
+                        int deviceID=myApplication.getInstance().getRegID();
+                        final Intent intent=new Intent(Regedit.this,Main3Activity.class);
+                        intent.putExtra("deviceID",deviceID);
+                        new Handler().postDelayed(new Runnable(){
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                                startActivity(intent);
+
+                            }
+                        }, 2000);
+
+                        //Toast.makeText(Regedit.this, "code:" + showcode, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception e) {
@@ -68,8 +82,10 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                 }
             }
             if (msg.what==SEND_QUEST_ERR){
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(Regedit.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
             }
+
         }
     };
 /**********************************************************/

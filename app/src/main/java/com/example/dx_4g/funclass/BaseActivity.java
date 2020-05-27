@@ -12,6 +12,7 @@ public abstract class BaseActivity extends AppCompatActivity {
        ActivityCollector.addActivity(this);
        //setSupportTollBar();
        initView();
+
        try {
            initData();
        } catch (httpopenException e) {

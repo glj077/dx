@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -23,6 +25,8 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
@@ -64,6 +68,8 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private TextView dx_count;
     private TextView dx_show;
     private int search_view_dx_show;
+    private  SwipeRefreshLayout mSwipe;
+
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -72,19 +78,23 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 int showcode=msg.arg1;
 
                 try {
-                    //Toast.makeText(Main2Activity.this,"code:"+showcode,Toast.LENGTH_SHORT).show();
                     parseJSONWITHGSON(response);
+                    mSwipe.setRefreshing(false);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    mSwipe.setRefreshing(false);
                 }
             }
             if (msg.what==SEND_REQUEST_ERR){
                 Toast.makeText(Main2Activity.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
+                mSwipe.setRefreshing(false);
             }
         }
     };
 
+    public Main2Activity() {
+    }
 
 
     @Override
@@ -104,6 +114,35 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
          list1 = (ListView) findViewById(R.id.dxlist);
          mContext = this;
+
+         mSwipe=(SwipeRefreshLayout) findViewById(R.id.swipelayout);
+        /*
+         * 设置进度条的颜色
+         * 参数是一个可变参数、可以填多个颜色
+         */
+        mSwipe.setColorSchemeColors(Color.parseColor("#d7a101"),Color.parseColor("#54c745"),Color.parseColor("#f16161"),Color.BLUE,Color.YELLOW);
+        /*
+         * 设置下拉刷新的监听
+         */
+        mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                list1.setAdapter(null);
+                initData();
+
+
+                    mSwipe.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        /*
+                         * 加载完毕之后就关闭进度条
+                         */
+                        mSwipe.setRefreshing(false);
+                    }
+                }, 5000);
+            }
+        });
+
 
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar1));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
