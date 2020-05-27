@@ -1,8 +1,14 @@
 package com.example.dx_4g.funclass;
 
+import android.app.PendingIntent;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -17,31 +23,38 @@ public class HttpUtilPut {
                     try {
                         URL url = new URL(address);
                         connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("put");
+                        connection.setRequestMethod("PUT");
                         connection.addRequestProperty("Accept", "application/json");
                         connection.addRequestProperty("Content-Type", "application/json");
                         connection.addRequestProperty("Authorization", pasBase64);
-                        connection.setReadTimeout(80000);
-                        connection.setConnectTimeout(80000);
+
+                        connection.setReadTimeout(30000);
+                        connection.setConnectTimeout(30000);
+                        connection.setUseCaches(false);
+                        connection.setChunkedStreamingMode(0);
                         //connection.setInstanceFollowRedirects(true);
-                        connection.setDoInput(true);
-                        connection.setDoOutput(true);
+                        //connection.setDoInput(false);
+                        //connection.setDoOutput(false);
+                        connection.connect();
+                        OutputStream out=connection.getOutputStream();
+                        out.write(regValuejsonString.getBytes());
+                        out.flush();
+                        out.close();
                         InputStream in = connection.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                        StringBuilder response = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            response.append(line);
-                        }
+
                         if (listener!=null){
-                            listener.onFinish(response.toString(),1);
+                            listener.onFinish(connection.getResponseMessage(),connection.getResponseCode());
 
                         }
 
 
                     } catch (Exception e) {
                         if (listener!=null){
-                            listener.onError(1,"12");
+                            try {
+                                listener.onError(connection.getResponseCode(),connection.getResponseMessage());
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
                         }
 
                     } finally {
