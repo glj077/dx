@@ -10,4 +10,10 @@
     <string name="dx_show_online">在线</string>
     <string name="toast_dlerror">用户名或密码错误</string>
     <string name="toast_dlshow">用户名或密码为空</string>
+    <string name="alarm_page">页数:</string>
+    <string name="alarm_number">数量:</string>
+    <string name="alarm_totalpage">总页数:</string>
+    <string name="alarm_totalalarm">总数:</string>
+    <string name="alarm_listname">报警名称</string>
+    <string name="alarm_listcount">报警内容</string>
 </resources>
