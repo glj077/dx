@@ -189,8 +189,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                     DXAdapter_query = new DXDeviceAdapter((LinkedList<DX_Device>) queryData, mContext);
                     list1.setAdapter(null);
                     list1.setAdapter(DXAdapter_query);
-
-
+                    searchView.clearFocus();
                 }
                 return true;
             }
@@ -201,6 +200,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 if (newText.isEmpty()){
                     list1.setAdapter(null);
                     list1.setAdapter(DXAdapter);
+                    searchView.clearFocus();
                 }
                 return true;
             }
@@ -347,7 +347,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void onResume() {
-
+        searchView.clearFocus();
         super.onResume();
     }
 

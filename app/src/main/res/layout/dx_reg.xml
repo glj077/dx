@@ -8,6 +8,7 @@
         android:layout_weight="2"
         android:id="@+id/regName"
         android:textSize="22sp"
+        android:textColor="@color/colorblack"
         android:layout_margin="10sp"
         android:layout_gravity="center"/>
     <TextView
@@ -17,6 +18,7 @@
         android:textSize="22sp"
         android:layout_margin="10sp"
         android:id="@+id/regValue"
+        android:textColor="@color/colorblack"
         android:layout_gravity="center" />
     <ImageView
         android:layout_width="0dp"

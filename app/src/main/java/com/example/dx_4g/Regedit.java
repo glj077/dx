@@ -24,6 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
@@ -50,6 +51,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     private  String regValue;
     private  String regValuejsonString;
     private  EditText userValueEdit;
+    private Toolbar toolbar;
 
     /********************************************/
     //消息处理
@@ -170,6 +172,26 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                             break;
 
                     }
+            }
+        });
+
+
+        /**************************************/
+        //ToolBar点击事件监听
+        toolbar=(Toolbar)findViewById(R.id.toolbar3);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_exit:
+                        ActivityCollector.killAllActivity();
+                        break;
+                    case R.id.action_test:
+                        //Intent intent=new Intent(Main4Activity.this,Main3Activity.class);
+                        //startActivity(intent);
+                        //overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+                }
+                return true;
             }
         });
     }

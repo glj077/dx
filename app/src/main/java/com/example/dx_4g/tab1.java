@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -33,8 +34,10 @@ import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.dx_4g.funclass.ActivityCollector;
+import com.example.dx_4g.funclass.DXDeviceAdapter;
 import com.example.dx_4g.funclass.DXDeviceRegAdapter;
 import com.example.dx_4g.funclass.DX_4G_Reg;
+import com.example.dx_4g.funclass.DX_Device;
 import com.example.dx_4g.funclass.DX_Device_Reg;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
@@ -60,7 +63,7 @@ public class tab1 extends Fragment {
    private  int regsign;
     private static final int SEND_REQUEST = 3;
     private static final int SEND_REQUEST_ERR=4;
-
+    private LinkedList<DX_Device_Reg>  queryData;
     private LinkedList<DX_Device_Reg> mDataReg;
     private List<DX_4G_Reg.DataBean> dataBeansReg;
     private DXDeviceRegAdapter DXAdapterReg;
@@ -68,31 +71,39 @@ public class tab1 extends Fragment {
     private Context mContext;
     private TextView regCount;
     private SwipeRefreshLayout mSwipe;
+    private int search_sign;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.tab1,container,false);
+        final View view=inflater.inflate(R.layout.tab1,container,false);
         listView=(ListView)view.findViewById(R.id.reg_list);
         regCount=(TextView)view.findViewById(R.id.reg_count);
+        search_sign=0;
 
         //listview控件点击事件
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                getRegValue_type(position,mDataReg);
                 Intent intent=new Intent(view.getContext(),Regedit.class);
-                intent.putExtra("regaddr",regPosition);
-                intent.putExtra("regaddrtype",regsign);
-                intent.putExtra("regname",mDataReg.get(position).getRegName());
-                intent.putExtra("regvalue",mDataReg.get(position).getRegValue());
+                if (search_sign==0) {
+                    getRegValue_type(position, mDataReg);
+                    intent.putExtra("regaddr",regPosition);
+                    intent.putExtra("regaddrtype",regsign);
+                    intent.putExtra("regname",mDataReg.get(position).getRegName());
+                    intent.putExtra("regvalue",mDataReg.get(position).getRegValue());
+                }else{
+                    getRegValue_type(position, queryData);
+                    intent.putExtra("regaddr",regPosition);
+                    intent.putExtra("regaddrtype",regsign);
+                    intent.putExtra("regname",queryData.get(position).getRegName());
+                    intent.putExtra("regvalue",queryData.get(position).getRegValue());
+                }
                 startActivity(intent);
                 //getActivity().onBackPressed();//关闭fragment tab1
 
             }
         });
-
-
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)view.findViewById(R.id.toolbar2);
         toolbar.setTitle("设备");
@@ -173,6 +184,51 @@ public class tab1 extends Fragment {
                 }, 5000);
             }
         });
+
+
+        //注册搜索事件
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        queryData = new LinkedList<DX_Device_Reg>();
+                        if (query.equals(null)) {
+                            Toast.makeText(getContext(), "请输入查询条件！", Toast.LENGTH_SHORT).show();
+                        } else {
+                            for (int i=0;i<DXAdapterReg.getCount();i++){
+                                if (query.equals(mDataReg.get(i).getRegName())){
+                                    queryData.add(new DX_Device_Reg(mDataReg.get(i).getRegName(),mDataReg.get(i).getRegValue(),mDataReg.get(i).getRegAddr(),0,0));
+                                }
+                            }
+
+                            DXDeviceRegAdapter   DXARegdapter_query = new DXDeviceRegAdapter((LinkedList<DX_Device_Reg>) queryData, mContext);
+                            listView.setAdapter(null);
+                            listView.setAdapter(DXARegdapter_query);
+                            search_sign=1;
+                            //输入法处理
+                            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                            boolean isOpen=imm.isActive();
+                            if (isOpen){
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                            }
+                            //让查询控件失去焦点
+                            searchView.clearFocus();
+                        }
+
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        if (newText.isEmpty()){
+                            listView.setAdapter(null);
+                            listView.setAdapter(DXAdapterReg);
+                            search_sign=0;
+                            searchView.clearFocus();
+                        }
+                        return true;
+                    }
+                });
 
 
         return view;
@@ -278,10 +334,18 @@ public class tab1 extends Fragment {
 
     @Override
     public void onResume() {
+        searchView.clearFocus();
+        search_sign=0;
         listView.setAdapter(null);
         int devicdID= myApplication.getInstance().getRegID();
         readRegValue(devicdID);
         super.onResume();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
     }
 
 
