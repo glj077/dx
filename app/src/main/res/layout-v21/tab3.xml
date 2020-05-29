@@ -29,17 +29,17 @@
             android:layout_margin="5dp"
             android:text="@string/alarm_page"/>
         <EditText
-            android:id="@+id/alarm_exit"
+            android:id="@+id/alarm_edit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
             android:textSize="20sp"
             android:gravity="center"
-            android:layout_margin="5dp"
-            android:text="test"/>
+            android:textColor="@color/colorblack"
+            android:layout_margin="5dp" />
         <TextView
-            android:id="@+id/totalpage"
+            android:id="@+id/alarmtotalpage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -49,14 +49,15 @@
             android:layout_margin="5dp"
             android:text="@string/alarm_totalpage"/>
         <TextView
+            android:id="@+id/alarmtotalpageshow"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
             android:textSize="20sp"
             android:gravity="center"
-            android:layout_margin="5dp"
-            android:text="test"/>
+            android:textColor="@color/colorblack"
+            android:layout_margin="5dp"/>
         <ImageView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -102,10 +103,14 @@
             android:textSize="25sp"
             android:text="@string/alarm_listcount"/>
     </LinearLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipelayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/alarm_list"/>
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

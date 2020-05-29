@@ -16,15 +16,14 @@ import java.util.LinkedList;
 
 //定义listView数据适配器
 public class DXDeviceAdapter extends BaseAdapter {
+
     private Context mContext;
     private LinkedList linkDXDeice;
 
     public DXDeviceAdapter(LinkedList<DX_Device> linkDXDeice, Context mContext){
         this.linkDXDeice=linkDXDeice;
         this.mContext=mContext;
-
     }
-
 
     @Override
     public int getCount() {

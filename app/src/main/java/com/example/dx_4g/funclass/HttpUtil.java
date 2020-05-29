@@ -70,6 +70,7 @@ public class HttpUtil {
                     } catch(Exception e){
                         if (listener != null) {
                             try {
+                                assert connection != null;
                                 listener.onError(connection.getResponseCode(),connection.getResponseMessage());
                             } catch (IOException ex) {
                                 ex.printStackTrace();

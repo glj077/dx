@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(final Message msg) {
-            progressBar.setVisibility(View.VISIBLE);
+
             if (msg.what == SEND_REQUEST) {
                 if (msg.arg1==200) {
                     final Intent intent = new Intent(MainActivity.this, Main2Activity.class);
@@ -116,6 +116,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             if (isOpen) {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
+            progressBar.setVisibility(View.VISIBLE);
             HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
 
                 @Override

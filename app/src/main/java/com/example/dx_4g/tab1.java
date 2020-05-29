@@ -20,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,6 +73,7 @@ public class tab1 extends Fragment {
     private TextView regCount;
     private SwipeRefreshLayout mSwipe;
     private int search_sign;
+    private ProgressBar progressBar;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
@@ -153,10 +155,13 @@ public class tab1 extends Fragment {
                 return true;
             }
         });
-
+       /*********************************************/
+       //页面初始数据加载
         int devicdID= myApplication.getInstance().getRegID();
             readRegValue(devicdID);
-
+            progressBar=getActivity().findViewById(R.id.progressBar3);
+            progressBar.setVisibility(View.VISIBLE);
+       /********************************************/
 
         mSwipe=(SwipeRefreshLayout)view.findViewById(R.id.swipelayout);
         /*
@@ -244,13 +249,18 @@ public class tab1 extends Fragment {
                 try {
                     parseJSONWITHGSON(response);
                     mSwipe.setRefreshing(false);
-
+                    progressBar.setVisibility(View.GONE);
                 } catch (JSONException e) {
+                    progressBar.setVisibility(View.GONE);
                     e.printStackTrace();
                 }
             }
             if (msg.what==SEND_REQUEST_ERR){
-                Toast.makeText(getContext(),"ErrorCode:"+msg.arg1+"  Message:"+(String)msg.obj,Toast.LENGTH_LONG).show();
+                mSwipe.setRefreshing(false);
+                progressBar.setVisibility(View.GONE);
+                Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
             }
         }
     };
@@ -337,6 +347,7 @@ public class tab1 extends Fragment {
         searchView.clearFocus();
         search_sign=0;
         listView.setAdapter(null);
+        progressBar.setVisibility(View.VISIBLE);
         int devicdID= myApplication.getInstance().getRegID();
         readRegValue(devicdID);
         super.onResume();
