@@ -1,19 +1,24 @@
 package com.example.dx_4g;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -48,6 +53,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class tab3 extends Fragment {
 
@@ -107,10 +113,11 @@ public class tab3 extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.tab3,container,false);
+        final View view=inflater.inflate(R.layout.tab3,container,false);
         alarmPage=(EditText)view.findViewById(R.id.alarm_edit);
         alarmToatlPage=(TextView)view.findViewById(R.id.alarmtotalpageshow);
         listView=(ListView)view.findViewById(R.id.alarm_list);
+        ImageView alarm_next_page=(ImageView)view.findViewById(R.id.alarm_next_page);
 
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)view.findViewById(R.id.toolbar2);
@@ -171,7 +178,7 @@ public class tab3 extends Fragment {
          /*************************************/
          //页面加载数据
         int deviceID= myApplication.getInstance().getRegID();
-        readRegValue(deviceID);
+        readRegValue(deviceID,1,null);
         progressBar=getActivity().findViewById(R.id.progressBar3);
         progressBar.setVisibility(View.VISIBLE);
 
@@ -194,7 +201,7 @@ public class tab3 extends Fragment {
             public void onRefresh() {
                 listView.setAdapter(null);
                 int devicdID= myApplication.getInstance().getRegID();
-                readRegValue(devicdID);
+                readRegValue(devicdID,1,null);
                 mSwipe.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -208,7 +215,79 @@ public class tab3 extends Fragment {
         });
 
 
+     /******************************************/
+     //Edit页注册改变响应事件
+     @SuppressLint("CutPasteId") final EditText alarm_page=(EditText)view.findViewById(R.id.alarm_edit);
+     alarm_page.addTextChangedListener(new TextWatcher() {
+         @Override
+         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+         }
+
+         @Override
+         public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+         }
+
+         @Override
+         public void afterTextChanged(Editable s) {
+             if (isInteger((String)s.toString())){
+             int alarepage=Integer.parseInt((String)s.toString());
+             int deviceID= myApplication.getInstance().getRegID();
+
+             progressBar=getActivity().findViewById(R.id.progressBar3);
+             progressBar.setVisibility(View.VISIBLE);
+             readRegValue(deviceID,alarepage,null);
+             alarm_page.clearFocus();
+                 //输入法处理
+                 InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                 boolean isOpen = imm.isActive();
+                 if (isOpen) {
+                     imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                 }
+             }
+
+         }
+     });
+     /********************************************/
+
+
+     /*******************************************/
+     /**********alarm_next_page点击事件注册*******/
+
+     alarm_next_page.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+             if (isInteger((String)alarm_page.getHint())){
+                 int alarepage=Integer.parseInt((String)alarm_page.getHint())+1;
+                alarm_page.setText(String.valueOf(alarepage));
+             }
+
+         }
+
+     });
+
+     /******************************************/
+
+
+     /*****************************************/
+     /**************搜索事件注册***************/
+     SearchView alarm_search=(SearchView)view.findViewById(R.id.search_alarm);
+     alarm_search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+         @Override
+         public boolean onQueryTextSubmit(String query) {
+             
+             return true;
+         }
+
+         @Override
+         public boolean onQueryTextChange(String newText) {
+             return false;
+         }
+     });
+
+
+     /****************************************/
 
         return view;
     }
@@ -216,8 +295,15 @@ public class tab3 extends Fragment {
 
     /******************************************/
 
-    private void readRegValue(int deviceID) {
-        String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/alarms";
+    private void readRegValue(int deviceID,int alarmPage,String alarmQueryTime) {
+           String webAddr = null;
+        if ((alarmPage==1)&&(alarmQueryTime==null)) {
+             webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms";
+        }
+        if ((alarmPage!=1)&&(alarmQueryTime==null)){
+             webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?page="+alarmPage;
+        }
+
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response,int httpcode) {
@@ -248,6 +334,7 @@ public class tab3 extends Fragment {
         }.getType());
         RegValueHandle(dataBeansAlarm);
         mContext = this.getContext();
+        alarmPage.setText(null);
         alarmPage.setHint(jsonArray1.getString("page"));
         alarmToatlPage.setText(jsonArray1.getString("pageCount"));
         DXAdapterAlarm = new DXDeviceAlarmAdapter((LinkedList<DX_Device_Alarm>) mDataAlarm, mContext);
@@ -268,10 +355,19 @@ public class tab3 extends Fragment {
         listView.setAdapter(null);
         int devicedID= myApplication.getInstance().getRegID();
         progressBar.setVisibility(View.VISIBLE);
-        readRegValue(devicedID);
+        readRegValue(devicedID,1,null);
         super.onResume();
     }
 
-
+    //判断是否为整型数
+    private boolean isInteger(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        //Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        Pattern pattern = Pattern.compile("^-?[1-9]\\d*$");
+        return pattern.matcher(str).matches();
+    }
+    /******************************************/
 
 }

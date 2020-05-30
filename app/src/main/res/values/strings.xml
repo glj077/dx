@@ -14,6 +14,6 @@
     <string name="alarm_number">数量:</string>
     <string name="alarm_totalpage">总页数:</string>
     <string name="alarm_totalalarm">总数:</string>
-    <string name="alarm_listname">报警名称</string>
-    <string name="alarm_listcount">报警内容</string>
+    <string name="alarm_listname">名称</string>
+    <string name="alarm_listcount">内容</string>
 </resources>
