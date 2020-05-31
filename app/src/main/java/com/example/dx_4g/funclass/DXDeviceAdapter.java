@@ -57,7 +57,7 @@ public class DXDeviceAdapter extends BaseAdapter {
         }else{
             viewHolder=(ViewHolder)convertView.getTag();
         }
-         viewHolder.dx_name.setText(dx_device.getDxName());
+         viewHolder.dx_name.setText("设备名称:" +dx_device.getDxName());
         viewHolder.dx_ip.setText(dx_device.getDxIp());
         viewHolder.dx_icon.setBackgroundResource(dx_device.getDxIcon());
         String dxOnline;

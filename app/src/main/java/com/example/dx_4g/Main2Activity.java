@@ -181,7 +181,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 } else {
                    for (int i=0;i<DXAdapter.getCount();i++){
                        if (query_name.equals(mData.get(i).getDxName())){
-                           queryData.add(new DX_Device(mData.get(i).getDxName(),mData.get(i).getDxIp(),R.mipmap.earth_foreground,mData.get(i).getDxStatus()));
+                           queryData.add(new DX_Device(mData.get(i).getDxName(),mData.get(i).getDxIp(),R.mipmap.earth_foreground,mData.get(i).getDxStatus(),mData.get(i).getDxID()));
 
                        }
                    }
@@ -230,13 +230,21 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
      list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
          @Override
          public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-             String deviceName=dataBeans.get(position).getName();
-             int deviceID=dataBeans.get(position).getId();
+             String deviceName=null;
+             int deviceID=0;
+             if (search_view_dx_show==0){
+                 deviceName=dataBeans.get(position).getName();
+                  deviceID=dataBeans.get(position).getId();
+             }
+             else{
+                     deviceName=mData_online.get(position).getDxName();
+                     deviceID=mData_online.get(position).getDxID();
+             }
              myApplication.getInstance().setRegID(deviceID);
              myApplication.getInstance().setDeviceName(deviceName);
              Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
-//             intent.putExtra("deviceID",deviceID);
-//             intent.putExtra("devieName",deviceName);
+            intent.putExtra("deviceID",deviceID);
+             intent.putExtra("devieName",deviceName);
              startActivity(intent);
          }
      });
@@ -305,7 +313,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                    for (int i = 0; i < dataBeans.size(); i++) {
 
                        if (dataBeans.get(i).getOnline()==1){
-                           mData_online.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+                           mData_online.add(new DX_Device( dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline(),dataBeans.get(i).getId()));
                        }
 
                    }
@@ -337,7 +345,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
          mData = new LinkedList<DX_Device>();
         for (int i = 0; i < dataBeans.size(); i++) {
-            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline()));
+            mData.add(new DX_Device("设备名称:" + dataBeans.get(i).getName(), "IP地址:" + dataBeans.get(i).getIp(), R.mipmap.earth_foreground,dataBeans.get(i).getOnline(),dataBeans.get(i).getId()));
             if (dataBeans.get(i).getOnline()==1){
                 online=online+1;
 

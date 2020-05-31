@@ -7,13 +7,16 @@ public class DX_Device {
     private String dxIp;
     private int dxIcon;
     private int dxStatus;
+    private int dxID;
     public DX_Device(){}
-    public DX_Device(String dxName,String dxIp,int dxIcon,int dxStatus){
+    public DX_Device(String dxName,String dxIp,int dxIcon,int dxStatus,int dxID){
         this.dxName=dxName;
         this.dxIp=dxIp;
         this.dxIcon=dxIcon;
         this.dxStatus=dxStatus;
+        this.dxID=dxID;
     }
+    public int getDxID(){return  dxID;}
     public String getDxName(){
         return dxName;
     }
@@ -34,4 +37,5 @@ public class DX_Device {
         this.dxIcon=dxIcon;
     }
     public void setDxStatus(int dxStatus){this.dxStatus=dxStatus;}
+    public void setDxID(int dxID){this.dxID=dxID;}
 }
