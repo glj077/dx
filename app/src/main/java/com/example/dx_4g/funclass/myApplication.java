@@ -9,6 +9,11 @@ public class myApplication extends Application {
     private static Context context;
     private  String pasbas64;
     private int regID;
+    private String deviceName;
+    private String querytime;
+
+    public String getDeviceName(){return  deviceName;}
+    public String getQuerytime(){return  querytime;}
     public  static myApplication getInstance(){
         return mApp;
     }
@@ -20,6 +25,8 @@ public class myApplication extends Application {
     }
     public int getRegID(){return regID;}
     public  void setRegID(int regID){this.regID=regID;}
+    public void setQuerytime(String querytime){this.querytime=querytime;}
+    public void setDeviceName(String deviceName){this.deviceName=deviceName;}
 
 
     @Override

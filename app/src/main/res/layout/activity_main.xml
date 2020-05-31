@@ -28,11 +28,15 @@
         android:ems="10"
         android:hint="@string/edittext2"
         android:inputType="textPassword"
-        android:textSize="20dp"
+        android:textSize="20sp"
+        android:paddingLeft="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user" />
+        app:layout_constraintTop_toBottomOf="@+id/user"
+        android:paddingStart="10dp"
+        tools:ignore="RtlSymmetry"
+        android:drawableStart="@drawable/padlock" />
 
     <EditText
         android:id="@+id/user"
@@ -45,12 +49,16 @@
         android:ems="10"
         android:hint="@string/edittext1"
         android:inputType="text"
-        android:textSize="20dp"
+        android:textSize="20sp"
+        android:paddingLeft="5dp"
         app:layout_constraintBottom_toTopOf="@+id/pas"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.709" />
+        app:layout_constraintVertical_bias="0.709"
+        android:drawableStart="@drawable/id"
+        android:paddingStart="10dp"
+        tools:ignore="RtlSymmetry" />
 
     <ProgressBar
         android:id="@+id/progressBar2"

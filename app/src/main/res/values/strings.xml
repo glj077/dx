@@ -16,4 +16,17 @@
     <string name="alarm_totalalarm">总数:</string>
     <string name="alarm_listname">名称</string>
     <string name="alarm_listcount">内容</string>
+    <string name="alarmquery_starttime">开始时间</string>
+    <string name="alarmquery_endtime">结束时间</string>
+    <string name="alarmquery_text">点击日历图标设置查询日期范围</string>
+    <string name="alarmquery_title">时间范围选择</string>
+    <string-array name="calendar_string">
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
+        <item>日</item>
+    </string-array>
 </resources>

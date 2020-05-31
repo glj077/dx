@@ -15,5 +15,12 @@
         <item name="android:textSize">32sp</item>
     </style>
 
+    <style name="Widget.CalendarView.Custom" parent="android:Widget.CalendarView">
+        <item name="android:focusedMonthDateColor">@color/color_on_off</item>
+        <item name="android:weekNumberColor">@color/colorblack</item>
+        <item name="android:weekSeparatorLineColor">@color/colorblack</item>
+    </style>
+
+
 
 </resources>

@@ -69,6 +69,9 @@ public class tab3 extends Fragment {
     private DXDeviceAlarmAdapter DXAdapterAlarm;
     private  SwipeRefreshLayout mSwipe;
     private ProgressBar progressBar;
+    private  TextView alarm_querytext;
+    private  String alarmQueryTimeShow;
+
     /****************************************/
     //消息处理
     @SuppressLint("HandlerLeak")
@@ -117,11 +120,16 @@ public class tab3 extends Fragment {
         alarmPage=(EditText)view.findViewById(R.id.alarm_edit);
         alarmToatlPage=(TextView)view.findViewById(R.id.alarmtotalpageshow);
         listView=(ListView)view.findViewById(R.id.alarm_list);
+        alarm_querytext=(TextView) view.findViewById(R.id.alarm_querytext);
         ImageView alarm_next_page=(ImageView)view.findViewById(R.id.alarm_next_page);
+
+        myApplication.getInstance().setQuerytime(null);
+        alarm_querytext.setText(getResources().getText(R.string.alarmquery_text));
+
 
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)view.findViewById(R.id.toolbar2);
-        toolbar.setTitle("报警");
+        toolbar.setTitle("报警:"+myApplication.getInstance().getDeviceName());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
         //Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
@@ -129,17 +137,8 @@ public class tab3 extends Fragment {
         TextView textView = (TextView) toolbar.getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
         textView.setGravity(Gravity.CENTER);
-        toolbar.setNavigationIcon(R.drawable.reexit);//设置导航图标
+        toolbar.setNavigationIcon(R.drawable.rego);//设置导航图标
 
-        SearchView searchView = (SearchView) view.findViewById(R.id.search_alarm);
-        searchView.setIconifiedByDefault(false);
-        searchView.setSubmitButtonEnabled(true);//增加提交按钮
-        // TextView textView1=searchView.findViewById(android.support.
-        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
-       //获取到searchview TextView的控件
-        TextView textView1 = (TextView) searchView.findViewById(id);
-       //设置字体大小为14sp
-        textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//18sp
 
         /***************************************/
         //导航按钮点击事件
@@ -200,7 +199,9 @@ public class tab3 extends Fragment {
             @Override
             public void onRefresh() {
                 listView.setAdapter(null);
+                alarm_querytext.setText(getResources().getText(R.string.alarmquery_text));
                 int devicdID= myApplication.getInstance().getRegID();
+                myApplication.getInstance().setQuerytime(null);
                 readRegValue(devicdID,1,null);
                 mSwipe.postDelayed(new Runnable() {
                     @Override
@@ -237,7 +238,7 @@ public class tab3 extends Fragment {
 
              progressBar=getActivity().findViewById(R.id.progressBar3);
              progressBar.setVisibility(View.VISIBLE);
-             readRegValue(deviceID,alarepage,null);
+             readRegValue(deviceID,alarepage,myApplication.getInstance().getQuerytime());
              alarm_page.clearFocus();
                  //输入法处理
                  InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -271,21 +272,15 @@ public class tab3 extends Fragment {
 
 
      /*****************************************/
-     /**************搜索事件注册***************/
-     SearchView alarm_search=(SearchView)view.findViewById(R.id.search_alarm);
-     alarm_search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-         @Override
-         public boolean onQueryTextSubmit(String query) {
-             
-             return true;
-         }
+     /**************TextView事件注册***************/
 
+     alarm_querytext.setOnClickListener(new View.OnClickListener() {
          @Override
-         public boolean onQueryTextChange(String newText) {
-             return false;
+         public void onClick(View v) {
+             Intent intent=new Intent(getContext(),Main4Activity.class);
+             startActivity(intent);
          }
      });
-
 
      /****************************************/
 
@@ -302,6 +297,9 @@ public class tab3 extends Fragment {
         }
         if ((alarmPage!=1)&&(alarmQueryTime==null)){
              webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?page="+alarmPage;
+        }
+        if(alarmQueryTime!=null){
+            webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?"+alarmQueryTime+"& page="+alarmPage;
         }
 
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
@@ -337,7 +335,17 @@ public class tab3 extends Fragment {
         alarmPage.setText(null);
         alarmPage.setHint(jsonArray1.getString("page"));
         alarmToatlPage.setText(jsonArray1.getString("pageCount"));
-        DXAdapterAlarm = new DXDeviceAlarmAdapter((LinkedList<DX_Device_Alarm>) mDataAlarm, mContext);
+        if (Integer.parseInt((String) alarmToatlPage.getText())==0){
+            alarmPage.setHint("0");
+            Toast mytoast=Toast.makeText(getContext(),"在查询日期范围无数据！",Toast.LENGTH_LONG);
+            mytoast.setGravity(Gravity.CENTER,0,190);
+            mytoast.show();
+        }
+        else{
+            alarmPage.setHint(jsonArray1.getString("page"));
+        }
+
+            DXAdapterAlarm = new DXDeviceAlarmAdapter((LinkedList<DX_Device_Alarm>) mDataAlarm, mContext);
         listView.setAdapter(DXAdapterAlarm);
 
     }
@@ -352,10 +360,15 @@ public class tab3 extends Fragment {
 
     @Override
     public void onResume() {
+        if(myApplication.getInstance().getQuerytime()!=null) {
+            alarmQueryTimeShow = "日期范围:"+myApplication.getInstance().getQuerytime().substring(5, 15) + "至" +
+                    myApplication.getInstance().getQuerytime().substring(30, 40);
+            alarm_querytext.setText(alarmQueryTimeShow);
+        }
         listView.setAdapter(null);
         int devicedID= myApplication.getInstance().getRegID();
         progressBar.setVisibility(View.VISIBLE);
-        readRegValue(devicedID,1,null);
+        readRegValue(devicedID,1,myApplication.getInstance().getQuerytime());
         super.onResume();
     }
 

@@ -9,7 +9,7 @@
         android:id="@+id/toolbar2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="@color/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:popupTheme="@style/ToolBarPopTheme"
@@ -18,6 +18,7 @@
         android:id="@+id/alarm_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/color_alarm_title1"
         android:orientation="horizontal">
         <TextView
             android:layout_width="0dp"
@@ -26,6 +27,7 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:textSize="20sp"
+            android:textColor="@color/colorblack"
             android:layout_margin="5dp"
             android:text="@string/alarm_page"/>
         <EditText
@@ -47,6 +49,7 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:textSize="20sp"
+            android:textColor="@color/colorblack"
             android:layout_margin="5dp"
             android:text="@string/alarm_totalpage"/>
         <TextView
@@ -68,15 +71,20 @@
             android:src="@drawable/alarm_next_page"/>
 
     </LinearLayout>
-
-    <SearchView
-        android:id="@+id/search_alarm"
+    <TextView
+        android:id="@+id/alarm_querytext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/searchView"
-        android:queryBackground="@null"
-        android:queryHint="请输入查询名称！"
-        tools:ignore="MissingConstraints" />
+        android:layout_gravity="center"
+        android:gravity="left|center_vertical"
+        android:padding="5dp"
+        android:text="@string/alarmquery_text"
+        android:background="@drawable/alarm_querytext_style"
+        android:textSize="20sp"
+        android:drawableRight="@drawable/calendar"
+        android:clickable="true"
+        android:focusable="true" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

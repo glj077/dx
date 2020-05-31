@@ -230,10 +230,13 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
      list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
          @Override
          public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+             String deviceName=dataBeans.get(position).getName();
              int deviceID=dataBeans.get(position).getId();
              myApplication.getInstance().setRegID(deviceID);
+             myApplication.getInstance().setDeviceName(deviceName);
              Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
-             intent.putExtra("deviceID",deviceID);
+//             intent.putExtra("deviceID",deviceID);
+//             intent.putExtra("devieName",deviceName);
              startActivity(intent);
          }
      });
@@ -243,6 +246,9 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void initData()  {
+        myApplication.getInstance().setQuerytime(null);
+        myApplication.getInstance().setRegID(0);
+
         mData_online = new LinkedList<DX_Device>();
         online=0;
         offline=0;

@@ -74,6 +74,7 @@ public class tab1 extends Fragment {
     private SwipeRefreshLayout mSwipe;
     private int search_sign;
     private ProgressBar progressBar;
+    private int varNumber;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
@@ -108,7 +109,7 @@ public class tab1 extends Fragment {
         });
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)view.findViewById(R.id.toolbar2);
-        toolbar.setTitle("设备");
+        toolbar.setTitle("设备:"+myApplication.getInstance().getDeviceName());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
 
@@ -118,7 +119,7 @@ public class tab1 extends Fragment {
         TextView textView = (TextView) toolbar.getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
         textView.setGravity(Gravity.CENTER);
-        toolbar.setNavigationIcon(R.drawable.reexit);//设置导航图标
+        toolbar.setNavigationIcon(R.drawable.rego);//设置导航图标
 
         searchView = (SearchView) view.findViewById(R.id.search_view1);
         searchView.setIconifiedByDefault(false);
@@ -296,7 +297,7 @@ public class tab1 extends Fragment {
         dataBeansReg = gson.fromJson(jsonArray.toString(), new TypeToken<List<DX_4G_Reg.DataBean>>() {
         }.getType());
         RegValueHandle(dataBeansReg);
-        regCount.setText(String.valueOf(dataBeansReg.size()));
+        regCount.setText(String.valueOf(varNumber));
         mContext = this.getContext();
         DXAdapterReg = new DXDeviceRegAdapter((LinkedList<DX_Device_Reg>) mDataReg, mContext);
 
@@ -306,8 +307,9 @@ public class tab1 extends Fragment {
 
     private  void RegValueHandle(List<DX_4G_Reg.DataBean> RegValue){
         mDataReg = new LinkedList<DX_Device_Reg>();
-
+        varNumber=0;
         for(int i=0;i<RegValue.size();i++){
+            varNumber=varNumber+1;
             if(i==RegValue.size()-1){
                 mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(),0,0));
                 break;
@@ -323,6 +325,7 @@ public class tab1 extends Fragment {
                 mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(), String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(), 0,0));
 
             }
+
         }
     }
 
@@ -346,6 +349,7 @@ public class tab1 extends Fragment {
     public void onResume() {
         searchView.clearFocus();
         search_sign=0;
+        varNumber=0;
         listView.setAdapter(null);
         progressBar.setVisibility(View.VISIBLE);
         int devicdID= myApplication.getInstance().getRegID();
@@ -355,7 +359,7 @@ public class tab1 extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
+        varNumber=0;
         super.onCreate(savedInstanceState);
     }
 

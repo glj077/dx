@@ -9,7 +9,7 @@
         android:id="@+id/toolbar2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="@color/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:popupTheme="@style/ToolBarPopTheme"
@@ -62,14 +62,18 @@
 
     </LinearLayout>
 
-    <SearchView
-        android:id="@+id/search_alarm"
+    <TextView
+        android:id="@+id/alarm_querytext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/searchView"
-        android:queryBackground="@null"
-        android:queryHint="请输入查询名称！"
-        tools:ignore="MissingConstraints" />
+        android:layout_gravity="center"
+        android:gravity="left|center_vertical"
+        android:text="@string/alarmquery_text"
+        android:background="@drawable/alarm_querytext_style"
+        android:drawableRight="@drawable/calendar"
+        android:clickable="true"
+        android:textSize="20sp"
+        android:focusable="true" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

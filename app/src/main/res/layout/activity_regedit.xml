@@ -39,7 +39,8 @@
             android:layout_marginRight="10dp"
             android:textColor="@color/colorblack"
             android:background="@drawable/edittextselect"
-            android:id="@+id/editaddrshow"/>
+            android:id="@+id/editaddrshow"
+            android:layout_marginEnd="10dp" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,7 +55,8 @@
             android:textColor="@color/colorblack"
             android:layout_weight="1"
             android:gravity="right"
-            android:id="@+id/editvalue"/>
+            android:id="@+id/editvalue"
+            tools:ignore="RtlHardcoded" />
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -65,7 +67,8 @@
             android:layout_marginRight="10dp"
             android:inputType="numberSigned|numberDecimal|numberSigned"
             android:background="@drawable/edittextselect"
-            android:id="@+id/editvalueshow" />
+            android:id="@+id/editvalueshow"
+            android:layout_marginEnd="10dp" />
     </LinearLayout>
 
     <LinearLayout
