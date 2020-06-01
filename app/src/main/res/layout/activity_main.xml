@@ -24,19 +24,19 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="454dp"
         android:background="@drawable/edittextselect"
+        android:drawableStart="@drawable/padlock"
         android:drawableLeft="@drawable/padlock"
         android:ems="10"
         android:hint="@string/edittext2"
         android:inputType="textPassword"
-        android:textSize="20sp"
+        android:paddingStart="10dp"
         android:paddingLeft="5dp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/user"
-        android:paddingStart="10dp"
-        tools:ignore="RtlSymmetry"
-        android:drawableStart="@drawable/padlock" />
+        tools:ignore="RtlSymmetry" />
 
     <EditText
         android:id="@+id/user"
@@ -70,5 +70,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/checkBox_use"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/check_use"
+        android:textSize="20sp"
+        android:theme="@style/myCheckBox"
+        app:layout_constraintBottom_toTopOf="@+id/imagelogin"
+        app:layout_constraintEnd_toStartOf="@+id/checkBox_pas"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pas" />
+
+    <CheckBox
+        android:id="@+id/checkBox_pas"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/check_pas"
+        android:textSize="20sp"
+        android:theme="@style/myCheckBox"
+        app:layout_constraintBottom_toTopOf="@+id/imagelogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/checkBox_use"
+        app:layout_constraintTop_toBottomOf="@+id/pas" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,6 +20,8 @@
     <string name="alarmquery_endtime">结束时间</string>
     <string name="alarmquery_text">点击日历图标设置查询日期范围</string>
     <string name="alarmquery_title">时间范围选择</string>
+    <string name="check_use">保存用户名</string>
+    <string name="check_pas">保存密码</string>
     <string-array name="calendar_string">
         <item>一</item>
         <item>二</item>

@@ -20,6 +20,11 @@
         <item name="android:weekNumberColor">@color/colorblack</item>
         <item name="android:weekSeparatorLineColor">@color/colorblack</item>
     </style>
+    
+    <style name="myCheckBox" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorControlNormal">@color/gray</item>
+        <item name="colorControlActivated">@color/switch_btn_colors</item>
+    </style>
 
 
 

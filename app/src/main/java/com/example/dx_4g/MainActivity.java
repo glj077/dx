@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.example.dx_4g.funclass.ActivityCollector;
@@ -40,6 +42,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private EditText user;
     private EditText pas;
     private ProgressBar progressBar;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+    private  CheckBox userCheckBox;
+    private CheckBox pasCheckBox;
 
 
     @SuppressLint("HandlerLeak")
@@ -100,7 +106,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void initView() {
         user=(EditText)findViewById(R.id.user);
         pas=(EditText)findViewById(R.id.pas);
+         userCheckBox = (CheckBox) findViewById(R.id.checkBox_use);
+         pasCheckBox = (CheckBox) findViewById(R.id.checkBox_pas);
         progressBar=(ProgressBar)findViewById(R.id.progressBar2);
+        pref=getPreferences(MODE_PRIVATE);
+
+
+        //登录用户名和密码保存处理
+        boolean isRememberPas=pref.getBoolean("remember_pas",false);
+        boolean isRememberUser=pref.getBoolean("remember_user",false);
+        if(isRememberUser){
+            String username=pref.getString("user","");
+            user.setText(username);
+            userCheckBox.setChecked(true);
+        }
+
+        if(isRememberPas){
+            String userpas=pref.getString("pas","");
+            pas.setText(userpas);
+            pasCheckBox.setChecked(true);
+        }
+
 
     }
 
@@ -125,12 +151,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        String account=user.getText().toString();
+        String password=pas.getText().toString();
         if ((!user.getText().toString().isEmpty())&&(!pas.getText().toString().isEmpty())) {
             String str = user.getText() + ":" + pas.getText();
             String strBase64 = "Basic " + Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
             myApplication.getInstance().setPasbas64(strBase64);
             user.clearFocus();
             pas.clearFocus();
+            editor=pref.edit();
+
+
+            if (userCheckBox.isChecked()){//检晒复选框是否被选中
+                editor.putBoolean("remember_user",true);
+                editor.putString("user",account);
+            }else{
+                editor.putBoolean("remember_user",false);
+                editor.putString("user","");
+            }
+            if (pasCheckBox.isChecked()){//检晒复选框是否被选中
+                editor.putBoolean("remember_pas",true);
+                editor.putString("pas",password);
+            }else{
+                editor.putBoolean("remember_pas",false);
+                editor.putString("pas","");
+            }
+            editor.apply();
+
             watchdog.watchdogRun(10000, new watchdogCallbackListener() {
                 @Override
                 public void onWatchDogFinish(long code, String message) {
