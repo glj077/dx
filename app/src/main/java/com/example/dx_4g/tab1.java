@@ -45,6 +45,8 @@ import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.RegCallBackListener;
 import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
+import com.example.dx_4g.funclass.watchdog;
+import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -64,6 +66,7 @@ public class tab1 extends Fragment {
    private  int regsign;
     private static final int SEND_REQUEST = 3;
     private static final int SEND_REQUEST_ERR=4;
+    private static final int WATCHDOG_FINISH=5;
     private LinkedList<DX_Device_Reg>  queryData;
     private LinkedList<DX_Device_Reg> mDataReg;
     private List<DX_4G_Reg.DataBean> dataBeansReg;
@@ -159,6 +162,7 @@ public class tab1 extends Fragment {
        /*********************************************/
        //页面初始数据加载
         int devicdID= myApplication.getInstance().getRegID();
+
             readRegValue(devicdID);
             progressBar=getActivity().findViewById(R.id.progressBar3);
             progressBar.setVisibility(View.VISIBLE);
@@ -178,6 +182,8 @@ public class tab1 extends Fragment {
             public void onRefresh() {
                 listView.setAdapter(null);
                 int devicdID= myApplication.getInstance().getRegID();
+
+
                 readRegValue(devicdID);
                 mSwipe.postDelayed(new Runnable() {
                     @Override
@@ -248,17 +254,32 @@ public class tab1 extends Fragment {
                 String response = (String) msg.obj;
 
                 try {
+                    watchdog.RemoveWatchDog(0);
                     parseJSONWITHGSON(response);
                     mSwipe.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
                 } catch (JSONException e) {
+                    watchdog.RemoveWatchDog(0);
                     progressBar.setVisibility(View.GONE);
                     e.printStackTrace();
+                    Toast mytoast=Toast.makeText(getContext(),"Code0:"+" Message:"+e.toString(),Toast.LENGTH_LONG);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
                 }
             }
             if (msg.what==SEND_REQUEST_ERR){
+                watchdog.RemoveWatchDog(0);
                 mSwipe.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
+                Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
+            }
+
+            if(msg.what==WATCHDOG_FINISH){
+                watchdog.RemoveWatchDog(0);
+                progressBar.setVisibility(View.GONE);
+                watchdog.RemoveWatchDog(0);
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();
@@ -267,6 +288,21 @@ public class tab1 extends Fragment {
     };
 
     private void readRegValue(int deviceID) {
+
+        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+            @Override
+            public void onWatchDogFinish(long code, String message) {
+                Message msg = Message.obtain();
+                msg.what = WATCHDOG_FINISH;
+                msg.arg1 =(int)(code);
+                msg.obj=message;
+                handler.sendMessage(msg);
+            }
+
+        });
+
+
+
         String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/regs";
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override

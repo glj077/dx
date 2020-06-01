@@ -44,6 +44,8 @@ import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.myApplication;
 import com.example.dx_4g.funclass.myToast;
+import com.example.dx_4g.funclass.watchdog;
+import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,6 +61,7 @@ public class tab3 extends Fragment {
 
     private static final int SEND_REQUEST=5;
     private static final int SEND_REQUEST_ERR=6;
+    private static final int WATCHDOG_FINISH=7;
     private List<DX_4G_Alarm.DataBean> dataBeansAlarm;
     private LinkedList<DX_Device_Alarm> mDataAlarm;
     private EditText alarmPage;
@@ -84,18 +87,23 @@ public class tab3 extends Fragment {
 
                 if (msg.arg1==200) {
                     try {
-
+                        watchdog.RemoveWatchDog(0);
                         parseJSONWITHGSON(response);
                         progressBar.setVisibility(View.GONE);
                         mSwipe.setRefreshing(false);
 
                     } catch (JSONException e) {
+                        watchdog.RemoveWatchDog(0);
                         e.printStackTrace();
                         progressBar.setVisibility(View.GONE);
+                        Toast mytoast=Toast.makeText(getContext(),"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                        mytoast.setGravity(Gravity.CENTER,0,190);
+                        mytoast.show();
                     }
 
                 }else{
                     mSwipe.setRefreshing(false);
+                    watchdog.RemoveWatchDog(0);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
@@ -104,7 +112,17 @@ public class tab3 extends Fragment {
 
             }
             if (msg.what==SEND_REQUEST_ERR){
+                watchdog.RemoveWatchDog(0);
                 progressBar.setVisibility(View.GONE);
+                Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
+            }
+
+            if(msg.what==WATCHDOG_FINISH){
+                watchdog.RemoveWatchDog(0);
+                progressBar.setVisibility(View.GONE);
+                watchdog.RemoveWatchDog(0);
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();
@@ -301,6 +319,21 @@ public class tab3 extends Fragment {
         if(alarmQueryTime!=null){
             webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?"+alarmQueryTime+"& page="+alarmPage;
         }
+
+        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+            @Override
+            public void onWatchDogFinish(long code, String message) {
+                Message msg = Message.obtain();
+                msg.what = WATCHDOG_FINISH;
+                msg.arg1 =(int)(code);
+                msg.obj=message;
+                handler.sendMessage(msg);
+            }
+
+        });
+
+
+
 
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override

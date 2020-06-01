@@ -37,6 +37,8 @@ import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
+import com.example.dx_4g.funclass.watchdog;
+import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -52,6 +54,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     private static final int SEND_REQUEST = 1;
     private static final int SEND_REQUEST_ERR=2;
+    private static final int WATCHDOG_FINISH=3;
     private myApplication application;
     private SearchView searchView;
     private DXDeviceAdapter DXAdapter;
@@ -78,18 +81,33 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 int showcode=msg.arg1;
 
                 try {
+                    watchdog.RemoveWatchDog(0);
                     parseJSONWITHGSON(response);
                     mSwipe.setRefreshing(false);
 
+
                 } catch (JSONException e) {
+                    watchdog.RemoveWatchDog(0);
                     e.printStackTrace();
                     mSwipe.setRefreshing(false);
+
                 }
             }
             if (msg.what==SEND_REQUEST_ERR){
-                Toast.makeText(Main2Activity.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
+                watchdog.RemoveWatchDog(0);
                 mSwipe.setRefreshing(false);
+                Toast.makeText(Main2Activity.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
+
+
             }
+
+            if(msg.what==WATCHDOG_FINISH){
+                watchdog.RemoveWatchDog(0);
+                Toast mytoast=Toast.makeText(Main2Activity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
+            }
+
         }
     };
 
@@ -129,6 +147,21 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             public void onRefresh() {
                 list1.setAdapter(null);
                 initData();
+
+                watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                    @Override
+                    public void onWatchDogFinish(long code, String message) {
+                        Message msg = Message.obtain();
+                        msg.what = WATCHDOG_FINISH;
+                        msg.arg1 =(int)(code);
+                        msg.obj=message;
+                        handler.sendMessage(msg);
+                    }
+
+                });
+
+
+
 
 
                     mSwipe.postDelayed(new Runnable() {
@@ -261,6 +294,22 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         online=0;
         offline=0;
         search_view_dx_show=0;
+
+        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+            @Override
+            public void onWatchDogFinish(long code, String message) {
+                Message msg = Message.obtain();
+                msg.what = WATCHDOG_FINISH;
+                msg.arg1 =(int)(code);
+                msg.obj=message;
+                handler.sendMessage(msg);
+            }
+
+        });
+
+
+
+
         HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
 
             @Override

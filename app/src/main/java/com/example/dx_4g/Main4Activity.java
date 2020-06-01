@@ -72,6 +72,7 @@ public class Main4Activity extends BaseActivity implements View.OnClickListener 
                 if (dateselectsign==1) {
                     mTextLeftDate.setText(selectdate);
                     mTextRightDate.setText(null);
+                    endQueryTime=null;
                     startQueryTime=year+"-"+isDateLength(month+1,10)+"-"+isDateLength(dayOfMonth,10)+" 00:00:00";
                 }else{
                     mTextRightDate.setText(selectdate);

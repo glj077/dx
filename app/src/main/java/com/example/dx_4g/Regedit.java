@@ -32,6 +32,8 @@ import com.example.dx_4g.funclass.HttpUtilPut;
 import com.example.dx_4g.funclass.JsonUtil;
 import com.example.dx_4g.funclass.RegValue;
 import com.example.dx_4g.funclass.myApplication;
+import com.example.dx_4g.funclass.watchdog;
+import com.example.dx_4g.funclass.watchdogCallbackListener;
 
 import org.json.JSONException;
 
@@ -44,6 +46,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
     private static final int SEND_QUEST=1;
     private static final int SEND_QUEST_ERR=2;
+    private static final int WATCHDOG_FINISH=3;
 
     private  int regAddr;
     private  int regType;
@@ -65,6 +68,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                 int showcode=msg.arg1;
                 try {
                     if (showcode==202) {
+                        watchdog.RemoveWatchDog(0);
                         int deviceID=myApplication.getInstance().getRegID();
                         final Intent intent=new Intent(Regedit.this,Main3Activity.class);
                         intent.putExtra("deviceID",deviceID);
@@ -76,16 +80,31 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                             }
                         }, 2000);
 
-                        //Toast.makeText(Regedit.this, "code:" + showcode, Toast.LENGTH_SHORT).show();
+
                     }
 
                 } catch (Exception e) {
+                    watchdog.RemoveWatchDog(0);
                     e.printStackTrace();
+                    Toast mytoast=Toast.makeText(Regedit.this,"Code:0"+" Message:"+e.toString(),Toast.LENGTH_LONG);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
                 }
             }
             if (msg.what==SEND_QUEST_ERR){
+                watchdog.RemoveWatchDog(0);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(Regedit.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
+                Toast mytoast=Toast.makeText(Regedit.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
+            }
+
+            if(msg.what==WATCHDOG_FINISH){
+                watchdog.RemoveWatchDog(0);
+                progressBar.setVisibility(View.GONE);
+                Toast mytoast=Toast.makeText(Regedit.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
             }
 
         }
@@ -220,6 +239,24 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                 if (!svvalue.isEmpty()){
                         if(((regType==0)&&(isInteger(svvalue)))||((regType==1)&&(isDouble(svvalue)))){
                             regValuejsonString=JsonString(regAddr, regType, svvalue);
+
+
+                            watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                                @Override
+                                public void onWatchDogFinish(long code, String message) {
+                                    Message msg = Message.obtain();
+                                    msg.what = WATCHDOG_FINISH;
+                                    msg.arg1 =(int)(code);
+                                    msg.obj=message;
+                                    handler.sendMessage(msg);
+                                }
+
+                            });
+
+
+
+
+
                              String webAddr="https://api.diacloudsolutions.com/devices/"+DeviceID+"/regs";
                              HttpUtilPut.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), regValuejsonString,new HttpCallbackListener() {
                                         @Override
@@ -243,11 +280,16 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
                     }
                         else{
-                            Toast.makeText(Regedit.this,"数值类型错误!",Toast.LENGTH_SHORT).show();
+
+                            Toast mytoast=Toast.makeText(Regedit.this,"数值类型错误!",Toast.LENGTH_SHORT);
+                            mytoast.setGravity(Gravity.CENTER,0,190);
+                            mytoast.show();
                         }
                 }else
                 {
-                    Toast.makeText(Regedit.this,"数值不能为空!",Toast.LENGTH_SHORT).show();
+                    Toast mytoast=Toast.makeText(Regedit.this,"数值不能为空!",Toast.LENGTH_SHORT);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
                 }
 
                 break;

@@ -23,6 +23,8 @@ import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.myApplication;
 import com.example.dx_4g.funclass.myToast;
+import com.example.dx_4g.funclass.watchdog;
+import com.example.dx_4g.funclass.watchdogCallbackListener;
 
 import android.util.Base64;
 import android.widget.ProgressBar;
@@ -34,9 +36,11 @@ import org.json.JSONException;
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int SEND_REQUEST=1;
     private static final int SEND_REQUEST_ERR=2;
+    private static final int WATCHDOG_FINISH=3;
     private EditText user;
     private EditText pas;
     private ProgressBar progressBar;
+
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -44,6 +48,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             if (msg.what == SEND_REQUEST) {
                 if (msg.arg1==200) {
+                    watchdog.RemoveWatchDog(0);
                     final Intent intent = new Intent(MainActivity.this, Main2Activity.class);
                     new Handler().postDelayed(new Runnable(){
                         public void run() {
@@ -58,6 +63,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             }
             if (msg.what==SEND_REQUEST_ERR){
+                watchdog.RemoveWatchDog(0);
                 new Handler().postDelayed(new Runnable(){
                     public void run() {
                         progressBar.setVisibility(View.GONE);
@@ -69,6 +75,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }, 2000);
 
 
+            }
+            if(msg.what==WATCHDOG_FINISH){
+                watchdog.RemoveWatchDog(0);
+                progressBar.setVisibility(View.GONE);
+                Toast mytoast=Toast.makeText(MainActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                mytoast.setGravity(Gravity.CENTER,0,190);
+                mytoast.show();
             }
         }
     };
@@ -95,6 +108,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void initData() {
 
     }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        watchdog.RemoveWatchDog(0);
+        handler.removeCallbacksAndMessages(MainActivity.this);
+        //watchdog.RemoveWatchDog();
+    }
+
     @Override
     protected void onStop() {
 
@@ -110,6 +131,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             myApplication.getInstance().setPasbas64(strBase64);
             user.clearFocus();
             pas.clearFocus();
+            watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                @Override
+                public void onWatchDogFinish(long code, String message) {
+                    Message msg = Message.obtain();
+                    msg.what = WATCHDOG_FINISH;
+                    msg.arg1 =(int)(code);
+                    msg.obj=message;
+                    handler.sendMessage(msg);
+                }
+
+            });
             //输入法处理
             InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
             boolean isOpen = imm.isActive();
