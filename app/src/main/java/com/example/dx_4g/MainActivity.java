@@ -35,6 +35,9 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int SEND_REQUEST=1;
     private static final int SEND_REQUEST_ERR=2;
@@ -153,76 +156,96 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         String account=user.getText().toString();
         String password=pas.getText().toString();
-        if ((!user.getText().toString().isEmpty())&&(!pas.getText().toString().isEmpty())) {
-            String str = user.getText() + ":" + pas.getText();
-            String strBase64 = "Basic " + Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
-            myApplication.getInstance().setPasbas64(strBase64);
-            user.clearFocus();
-            pas.clearFocus();
-            editor=pref.edit();
+        if(isEmail(account)) {
+            if ((!user.getText().toString().isEmpty()) && (!pas.getText().toString().isEmpty())) {
+                String str = user.getText() + ":" + pas.getText();
+                String strBase64 = "Basic " + Base64.encodeToString(str.getBytes(), Base64.DEFAULT);//计算BASE64位加密
+                myApplication.getInstance().setPasbas64(strBase64);
+                user.clearFocus();
+                pas.clearFocus();
+                editor = pref.edit();
 
 
-            if (userCheckBox.isChecked()){//检晒复选框是否被选中
-                editor.putBoolean("remember_user",true);
-                editor.putString("user",account);
-            }else{
-                editor.putBoolean("remember_user",false);
-                editor.putString("user","");
-            }
-            if (pasCheckBox.isChecked()){//检晒复选框是否被选中
-                editor.putBoolean("remember_pas",true);
-                editor.putString("pas",password);
-            }else{
-                editor.putBoolean("remember_pas",false);
-                editor.putString("pas","");
-            }
-            editor.apply();
-
-            watchdog.watchdogRun(10000, new watchdogCallbackListener() {
-                @Override
-                public void onWatchDogFinish(long code, String message) {
-                    Message msg = Message.obtain();
-                    msg.what = WATCHDOG_FINISH;
-                    msg.arg1 =(int)(code);
-                    msg.obj=message;
-                    handler.sendMessage(msg);
+                if (userCheckBox.isChecked()) {//检晒复选框是否被选中
+                    editor.putBoolean("remember_user", true);
+                    editor.putString("user", account);
+                } else {
+                    editor.putBoolean("remember_user", false);
+                    editor.putString("user", "");
                 }
+                if (pasCheckBox.isChecked()) {//检晒复选框是否被选中
+                    editor.putBoolean("remember_pas", true);
+                    editor.putString("pas", password);
+                } else {
+                    editor.putBoolean("remember_pas", false);
+                    editor.putString("pas", "");
+                }
+                editor.apply();
 
-            });
-            //输入法处理
-            InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
-            boolean isOpen = imm.isActive();
-            if (isOpen) {
-                imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                    @Override
+                    public void onWatchDogFinish(long code, String message) {
+                        Message msg = Message.obtain();
+                        msg.what = WATCHDOG_FINISH;
+                        msg.arg1 = (int) (code);
+                        msg.obj = message;
+                        handler.sendMessage(msg);
+                    }
+
+                });
+                //输入法处理
+                InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                boolean isOpen = imm.isActive();
+                if (isOpen) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+                progressBar.setVisibility(View.VISIBLE);
+                HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
+
+                    @Override
+                    public void onFinish(String response, int httpcode) {
+
+                        Message msg = Message.obtain();
+                        msg.what = SEND_REQUEST;
+                        msg.arg1 = httpcode;
+                        handler.sendMessage(msg);
+                    }
+
+                    @Override
+                    public void onError(int httpcode, String httpmessage) {
+                        Message msg = Message.obtain();
+                        msg.what = SEND_REQUEST_ERR;
+                        msg.arg1 = httpcode;
+                        msg.obj = httpmessage;
+                        handler.sendMessage(msg);
+                    }
+                });
+            } else {
+
+                myToast mytoast = new myToast(getBaseContext(), R.layout.toast_style, R.id.toasttext, R.string.toast_dlshow);
+                mytoast.show(Gravity.CENTER, 0, 190);
             }
-            progressBar.setVisibility(View.VISIBLE);
-            HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
-
-                @Override
-                public void onFinish(String response, int httpcode) {
-
-                    Message msg = Message.obtain();
-                    msg.what = SEND_REQUEST;
-                    msg.arg1 = httpcode;
-                    handler.sendMessage(msg);
-                }
-
-                @Override
-                public void onError(int httpcode, String httpmessage) {
-                    Message msg = Message.obtain();
-                    msg.what = SEND_REQUEST_ERR;
-                    msg.arg1 = httpcode;
-                    msg.obj = httpmessage;
-                    handler.sendMessage(msg);
-                }
-            });
-        }else {
-
-            myToast mytoast=new myToast(getBaseContext(),R.layout.toast_style,R.id.toasttext,R.string.toast_dlshow);
-            mytoast.show(Gravity.CENTER,0,190);
+        }else
+        {
+            Toast mytoast=Toast.makeText(MainActivity.this,R.string.user_format,Toast.LENGTH_LONG);
+            mytoast.setGravity(Gravity.CENTER,0,190);
+            mytoast.show();
         }
 
         }
+
+    /**
+     * 判断邮箱是否合法
+     * @param email
+     * @return
+     */
+    public static boolean isEmail(String email){
+        if (null==email || "".equals(email)) return false;
+        //Pattern p = Pattern.compile("\\w+@(\\w+.)+[a-z]{2,3}"); //简单匹配
+        Pattern p =  Pattern.compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");//复杂匹配
+        Matcher m = p.matcher(email);
+        return m.matches();
+    }
 }
 
 
