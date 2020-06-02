@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -14,14 +15,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.webkit.WebView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -50,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("RedundantCast")
 public class Main2Activity extends BaseActivity implements View.OnClickListener {
 
     private static final int SEND_REQUEST = 1;
@@ -195,10 +200,29 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         searchView.setSubmitButtonEnabled(true);//增加提交按钮
        // TextView textView1=searchView.findViewById(android.support.
         int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
+
 //获取到searchview TextView的控件
         TextView textView1 = (TextView) searchView.findViewById(id);
 //设置字体大小为14sp
         textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//14sp
+        textView1.setTextColor(getResources().getColor(R.color.colorwhite));
+        textView1.setHintTextColor(getResources().getColor(R.color.colorwhite));
+        searchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);//让键盘回车设置成搜索功能
+
+
+        /******
+         * 以下功能可以在布局文件中实现
+         */
+//        int search_mag_icon_id = searchView.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+//        ImageView mSearchViewIcon = (ImageView) searchView.findViewById(search_mag_icon_id);
+//        mSearchViewIcon.setImageResource(R.drawable.search);
+//
+//        int search_close_icon_id = searchView.getContext().getResources().getIdentifier("android:id/search_close_btn", null, null);
+//        ImageView mSearchCloseIcon = (ImageView) searchView.findViewById(search_close_icon_id);
+//        mSearchCloseIcon.setImageResource(R.drawable.close);
+
+
+
 
 
 

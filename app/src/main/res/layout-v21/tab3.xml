@@ -18,7 +18,7 @@
         android:id="@+id/alarm_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_alarm_title1"
+        android:background="@color/searchView"
         android:orientation="horizontal">
         <TextView
             android:layout_width="0dp"
@@ -27,7 +27,7 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:textSize="18sp"
-            android:textColor="@color/colorblack"
+            android:textColor="@color/colorwhite"
             android:layout_margin="5dp"
             android:text="@string/alarm_page"/>
         <EditText
@@ -39,7 +39,8 @@
             android:textSize="18sp"
             android:gravity="center"
             android:inputType="number"
-            android:textColor="@color/colorblack"
+            android:textColor="@color/colorwhite"
+            android:textColorHint="@color/colorwhite"
             android:layout_margin="5dp" />
         <TextView
             android:id="@+id/alarmtotalpage"
@@ -49,7 +50,7 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:textSize="18sp"
-            android:textColor="@color/colorblack"
+            android:textColor="@color/colorwhite"
             android:layout_margin="5dp"
             android:text="@string/alarm_totalpage"/>
         <TextView
@@ -60,7 +61,7 @@
             android:layout_gravity="center"
             android:textSize="18sp"
             android:gravity="center"
-            android:textColor="@color/colorblack"
+            android:textColor="@color/colorwhite"
             android:layout_margin="5dp"/>
         <ImageView
             android:layout_width="0dp"
@@ -80,6 +81,7 @@
         android:padding="5dp"
         android:text="@string/alarmquery_text"
         android:background="@drawable/alarm_querytext_style"
+        android:textColor="@color/colorwhite"
         android:textSize="20sp"
         android:drawableRight="@drawable/calendar"
         android:clickable="true"
@@ -95,6 +97,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/alarm_listname"
+            android:textColor="@color/colorwhite"
             android:textSize="25sp"
             android:background="@drawable/text_frame"
             android:layout_gravity="center"
@@ -107,6 +110,7 @@
             android:layout_weight="3"
             android:layout_gravity="center"
             android:gravity="center"
+            android:textColor="@color/colorwhite"
             android:background="@drawable/text_frame"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"

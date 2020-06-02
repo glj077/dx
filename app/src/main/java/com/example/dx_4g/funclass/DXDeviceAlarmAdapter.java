@@ -55,9 +55,13 @@ public class DXDeviceAlarmAdapter extends BaseAdapter {
         viewHolder.alarm_name.setText(dx_device_alarm.getAlarmName());
         viewHolder.alarm_count.setText(dx_device_alarm.getAlarmCount());
         if (position%2==0) {
-            convertView.setBackgroundResource(R.color.color_list1);
+            //convertView.setBackgroundResource(R.color.color_list1);
+            ((TextView) convertView.findViewById(R.id.alarm_list_name)).setTextColor(convertView.getResources().getColor(R.color.color_list1));
+            ((TextView) convertView.findViewById(R.id.alarm_list_count)).setTextColor(convertView.getResources().getColor(R.color.color_list1));
         }else{
-            convertView.setBackgroundResource(R.color.color_list2);
+            //convertView.setBackgroundResource(R.color.color_list2);
+            ((TextView) convertView.findViewById(R.id.alarm_list_name)).setTextColor(convertView.getResources().getColor(R.color.color_list2));
+            ((TextView) convertView.findViewById(R.id.alarm_list_count)).setTextColor(convertView.getResources().getColor(R.color.color_list2));
         }
 
 

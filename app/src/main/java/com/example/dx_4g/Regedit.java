@@ -220,6 +220,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     //数据初始化
     @Override
     protected void initData() {
+
         regAddr=getIntent().getIntExtra("regaddr",0);
         regType=getIntent().getIntExtra("regaddrtype",0);
         regName=getIntent().getStringExtra("regname");
@@ -227,6 +228,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         TextView textView=(TextView)findViewById(R.id.editaddrshow);
         textView.setText(regName);
         userValueEdit.setHint(regValue);
+
     }
     /*****************************************/
     //按钮事件响应
@@ -361,7 +363,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
             return false;
         }
         //Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-        Pattern pattern = Pattern.compile("^-?[1-9]\\d*$");
+        Pattern pattern = Pattern.compile("^-?[0-9]\\d*$");
         return pattern.matcher(str).matches();
     }
    /******************************************/
@@ -375,6 +377,18 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         }
         Pattern pattern = Pattern.compile("^(-?\\d+)(\\.\\d+)?$");
         return pattern.matcher(str).matches();
+    }
+
+    @Override
+    protected void onResume() {
+        regAddr=getIntent().getIntExtra("regaddr",0);
+        regType=getIntent().getIntExtra("regaddrtype",0);
+        regName=getIntent().getStringExtra("regname");
+        regValue=getIntent().getStringExtra("regvalue");
+        TextView textView=(TextView)findViewById(R.id.editaddrshow);
+        textView.setText(regName);
+        userValueEdit.setHint(regValue);
+        super.onResume();
     }
 
 

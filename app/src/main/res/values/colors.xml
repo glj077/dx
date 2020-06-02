@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#A7FFEB</color>
+    <color name="colorPrimary">#64DD17</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="color1">#9C27B0</color>
@@ -11,7 +11,7 @@
     <color name="bg_toolbar">#32A082</color>
     <color name="tab_text_normal">#283593</color>
     <color name="tab_text_selected">#64B5F6</color>
-    <color name="searchView">#FFEB3B</color>
+    <color name="searchView">#171714</color>
     <color name="color_online">#11C61A</color>
     <color name="color_on_off">#D8176C</color>
     <color name="color_online_text">#0341EA</color>
@@ -30,4 +30,6 @@
     <color name="color_alarm_title1">#EEFF41</color>
     <color name="gray">#777373</color>
     <color name="switch_btn_colors">#EF9A9A</color>
+    <!--第二版-->
+    <color name="list_back">#0A0A32</color>
 </resources>

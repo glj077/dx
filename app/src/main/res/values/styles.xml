@@ -11,8 +11,12 @@
         <item name="android:colorBackground">#E0F7FA</item>
         <item name="android:textColor">#011510</item>
     </style>
+
+    <!--标题栏文本设置-->
     <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textSize">25sp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/colorwhite</item>
+
     </style>
 
     <style name="Widget.CalendarView.Custom" parent="android:Widget.CalendarView">
@@ -20,10 +24,28 @@
         <item name="android:weekNumberColor">@color/colorblack</item>
         <item name="android:weekSeparatorLineColor">@color/colorblack</item>
     </style>
-    
+    <!--CheckBox控件设置-->
     <style name="myCheckBox" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorControlNormal">@color/gray</item>
         <item name="colorControlActivated">@color/switch_btn_colors</item>
+    </style>
+    <!--标题栏文本设置，修改标题栏的右边三个点的颜色和溢出菜单的字体大小-->
+    <style name="myTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorControlNormal">@color/colorwhite</item>
+        <item name="android:textSize">@dimen/toolrbarTextSize</item> <!--字体大小-->
+
+    </style>
+
+    <!--修改searchView字体颜色、大小-->
+    <style name="AppAutoCompleteTextView" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textColor">@color/colorwhite</item>
+        <item name="android:textAppearance">@style/AutoCompleteTextAppearance</item>
+    </style>
+    <style name="AutoCompleteTextAppearance" parent="android:TextAppearance">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textColorHint">@color/colorPrimary</item>
+        <item name="android:textColorHighlight">@color/color_on_off</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
 

@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -131,8 +132,14 @@ public class tab1 extends Fragment {
         int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
 //获取到searchview TextView的控件
         TextView textView1 = (TextView) searchView.findViewById(id);
+        textView1.setTextColor(getResources().getColor(R.color.colorwhite));
+        textView1.setHintTextColor(getResources().getColor(R.color.colorwhite));
+        searchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);//让键盘回车设置成搜索功能
 //设置字体大小为14sp
         textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);//14sp
+
+
+
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -362,17 +369,20 @@ public class tab1 extends Fragment {
 
             }
 
+
         }
+
     }
 
     private static float intToFloat(int HValue,int LValue){
         String Hhex= Integer.toHexString(HValue);
         String Lhex=Integer.toHexString(LValue);
+        for(int i=Lhex.length();i<4;i++){
+            Lhex="0"+Lhex;
+        }
         String hex=Hhex+Lhex;
         return Float.intBitsToFloat(new BigInteger(hex, 16).intValue());
     }
-
-
 
 
    private void getRegValue_type(int position,LinkedList<DX_Device_Reg> mDataReg){

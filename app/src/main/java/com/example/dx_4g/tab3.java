@@ -411,7 +411,7 @@ public class tab3 extends Fragment {
             return false;
         }
         //Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-        Pattern pattern = Pattern.compile("^-?[1-9]\\d*$");
+        Pattern pattern = Pattern.compile("^-?[0-9]\\d*$");
         return pattern.matcher(str).matches();
     }
     /******************************************/
