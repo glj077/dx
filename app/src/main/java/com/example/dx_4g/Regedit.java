@@ -64,10 +64,9 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
             final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar);
             progressBar.setVisibility(View.VISIBLE);
             if (msg.what == SEND_QUEST) {
-                String response = (String) msg.obj;
-                int showcode=msg.arg1;
+
                 try {
-                    if (showcode==202) {
+                    if (msg.arg1==202) {
                         watchdog.RemoveWatchDog(0);
                         int deviceID=myApplication.getInstance().getRegID();
                         final Intent intent=new Intent(Regedit.this,Main3Activity.class);
@@ -82,9 +81,17 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
 
                     }
+                    else{
+                        watchdog.RemoveWatchDog(0);
+                        progressBar.setVisibility(View.GONE);
+                        Toast mytoast=Toast.makeText(Regedit.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        mytoast.setGravity(Gravity.CENTER,0,190);
+                        mytoast.show();
+                    }
 
                 } catch (Exception e) {
                     watchdog.RemoveWatchDog(0);
+                    progressBar.setVisibility(View.GONE);
                     e.printStackTrace();
                     Toast mytoast=Toast.makeText(Regedit.this,"Code:0"+" Message:"+e.toString(),Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
@@ -133,7 +140,8 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setTitle("设备");
-        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setNavigationIcon(R.drawable.reexit);//设置导航图标
+        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setNavigationIcon(R.drawable.rego);//设置导航图标
+
         // 以下动作让标题居中显地
         TextView textView = (TextView) ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).getChildAt(0);//主标题
         textView.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;//填充父类
@@ -243,7 +251,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                             regValuejsonString=JsonString(regAddr, regType, svvalue);
 
 
-                            watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                            watchdog.watchdogRun(15000, new watchdogCallbackListener() {
                                 @Override
                                 public void onWatchDogFinish(long code, String message) {
                                     Message msg = Message.obtain();
@@ -259,7 +267,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
 
 
-                             String webAddr="https://api.diacloudsolutions.com/devices/"+DeviceID+"/regs";
+                             String webAddr="https://api.diacloudsolutions.com.cn/devices/"+DeviceID+"/regs";
                              HttpUtilPut.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), regValuejsonString,new HttpCallbackListener() {
                                         @Override
                                         public void onFinish(String response, int httpcode) {

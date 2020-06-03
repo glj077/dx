@@ -54,6 +54,7 @@ public class HttpUtilPut {
                                 listener.onError(connection.getResponseCode(),connection.getResponseMessage());
                             } catch (IOException ex) {
                                 ex.printStackTrace();
+                                listener.onError(0,ex.toString());
                             }
                         }
 

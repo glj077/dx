@@ -62,7 +62,7 @@ public class HttpUtil {
                     }
                     else{
                         if (listener != null) {
-
+                            listener.onFinish(httpshowmessage,httpshowcode);
                         }
 
                     }
@@ -74,6 +74,7 @@ public class HttpUtil {
                                 listener.onError(connection.getResponseCode(),connection.getResponseMessage());
                             } catch (IOException ex) {
                                 ex.printStackTrace();
+                                listener.onError(0,e.toString());
                             }
                         }
 

@@ -258,21 +258,33 @@ public class tab1 extends Fragment {
         public void handleMessage(Message msg) {
 
             if (msg.what == SEND_REQUEST) {
-                String response = (String) msg.obj;
+                if (msg.arg1 == 200) {
+                    String response = (String) msg.obj;
 
-                try {
+                    try {
+                        watchdog.RemoveWatchDog(0);
+                        parseJSONWITHGSON(response);
+                        mSwipe.setRefreshing(false);
+                        progressBar.setVisibility(View.GONE);
+                    } catch (JSONException e) {
+                        watchdog.RemoveWatchDog(0);
+                        progressBar.setVisibility(View.GONE);
+                        e.printStackTrace();
+                        Toast mytoast = Toast.makeText(getContext(), "Code0:" + " Message:" + e.toString(), Toast.LENGTH_LONG);
+                        mytoast.setGravity(Gravity.CENTER, 0, 190);
+                        mytoast.show();
+                    }
+                }
+                else{
                     watchdog.RemoveWatchDog(0);
-                    parseJSONWITHGSON(response);
                     mSwipe.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
-                } catch (JSONException e) {
-                    watchdog.RemoveWatchDog(0);
-                    progressBar.setVisibility(View.GONE);
-                    e.printStackTrace();
-                    Toast mytoast=Toast.makeText(getContext(),"Code0:"+" Message:"+e.toString(),Toast.LENGTH_LONG);
+                    Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
                     mytoast.show();
+
                 }
+
             }
             if (msg.what==SEND_REQUEST_ERR){
                 watchdog.RemoveWatchDog(0);
@@ -284,19 +296,20 @@ public class tab1 extends Fragment {
             }
 
             if(msg.what==WATCHDOG_FINISH){
-                watchdog.RemoveWatchDog(0);
                 progressBar.setVisibility(View.GONE);
-                watchdog.RemoveWatchDog(0);
+                mSwipe.setRefreshing(false);
+                if (getContext()!=null){
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
-                mytoast.show();
+                mytoast.show();}
+                watchdog.RemoveWatchDog(0);
             }
         }
     };
 
     private void readRegValue(int deviceID) {
 
-        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+        watchdog.watchdogRun(20000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();
@@ -310,7 +323,7 @@ public class tab1 extends Fragment {
 
 
 
-        String webAddr="https://api.diacloudsolutions.com/devices/"+deviceID+"/regs";
+        String webAddr="https://api.diacloudsolutions.com.cn/devices/"+deviceID+"/regs";
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response,int httpcode) {

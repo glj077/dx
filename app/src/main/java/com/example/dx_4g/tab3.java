@@ -83,9 +83,8 @@ public class tab3 extends Fragment {
 
             if (msg.what == SEND_REQUEST) {
 
-                String response = (String) msg.obj;
-
                 if (msg.arg1==200) {
+                    String response = (String) msg.obj;
                     try {
                         watchdog.RemoveWatchDog(0);
                         parseJSONWITHGSON(response);
@@ -94,6 +93,7 @@ public class tab3 extends Fragment {
 
                     } catch (JSONException e) {
                         watchdog.RemoveWatchDog(0);
+                        mSwipe.setRefreshing(false);
                         e.printStackTrace();
                         progressBar.setVisibility(View.GONE);
                         Toast mytoast=Toast.makeText(getContext(),"Code:0"+e.toString(),Toast.LENGTH_LONG);
@@ -120,12 +120,12 @@ public class tab3 extends Fragment {
             }
 
             if(msg.what==WATCHDOG_FINISH){
-                watchdog.RemoveWatchDog(0);
+
                 progressBar.setVisibility(View.GONE);
-                watchdog.RemoveWatchDog(0);
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();
+                watchdog.RemoveWatchDog(0);
             }
         }
     };
@@ -311,16 +311,16 @@ public class tab3 extends Fragment {
     private void readRegValue(int deviceID,int alarmPage,String alarmQueryTime) {
            String webAddr = null;
         if ((alarmPage==1)&&(alarmQueryTime==null)) {
-             webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms";
+             webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/alarms";
         }
         if ((alarmPage!=1)&&(alarmQueryTime==null)){
-             webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?page="+alarmPage;
+             webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/alarms?page="+alarmPage;
         }
         if(alarmQueryTime!=null){
-            webAddr = "https://api.diacloudsolutions.com/devices/" + deviceID + "/alarms?"+alarmQueryTime+"& page="+alarmPage;
+            webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/alarms?"+alarmQueryTime+"& page="+alarmPage;
         }
 
-        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+        watchdog.watchdogRun(15000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();

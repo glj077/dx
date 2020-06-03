@@ -82,22 +82,33 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             if (msg.what == SEND_REQUEST) {
-                String response = (String) msg.obj;
-                int showcode=msg.arg1;
+                if (msg.arg1 == 200) {
+                    String response = (String) msg.obj;
 
-                try {
+                    try {
+                        watchdog.RemoveWatchDog(0);
+                        parseJSONWITHGSON(response);
+                        mSwipe.setRefreshing(false);
+
+
+                    } catch (JSONException e) {
+                        watchdog.RemoveWatchDog(0);
+                        e.printStackTrace();
+                        mSwipe.setRefreshing(false);
+
+                    }
+                }
+                else{
                     watchdog.RemoveWatchDog(0);
-                    parseJSONWITHGSON(response);
                     mSwipe.setRefreshing(false);
-
-
-                } catch (JSONException e) {
-                    watchdog.RemoveWatchDog(0);
-                    e.printStackTrace();
-                    mSwipe.setRefreshing(false);
+                    Toast mytoast=Toast.makeText(Main2Activity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
 
                 }
+
             }
+
             if (msg.what==SEND_REQUEST_ERR){
                 watchdog.RemoveWatchDog(0);
                 mSwipe.setRefreshing(false);
@@ -116,8 +127,6 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         }
     };
 
-    public Main2Activity() {
-    }
 
 
     @Override
@@ -303,6 +312,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             intent.putExtra("deviceID",deviceID);
              intent.putExtra("devieName",deviceName);
              startActivity(intent);
+             finish();
          }
      });
 
@@ -319,7 +329,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         offline=0;
         search_view_dx_show=0;
 
-        watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+        watchdog.watchdogRun(15000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();
@@ -334,17 +344,15 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
 
 
-        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
+        HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com.cn/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
 
             @Override
             public void onFinish(String response,int httpcode) {
-                if (httpcode==200) {
                     Message msg = Message.obtain();
                     msg.what = SEND_REQUEST;
                     msg.obj = response;
                     msg.arg1 = httpcode;
                     handler.sendMessage(msg);
-                }
 
             }
 

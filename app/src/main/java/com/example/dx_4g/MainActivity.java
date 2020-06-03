@@ -69,6 +69,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     }, 2000);
 
                 }
+                else{
+                    watchdog.RemoveWatchDog(0);
+                    progressBar.setVisibility(View.GONE);
+                    Toast mytoast=Toast.makeText(MainActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
+
+                }
 
             }
             if (msg.what==SEND_REQUEST_ERR){
@@ -182,7 +190,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
                 editor.apply();
 
-                watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                watchdog.watchdogRun(15000, new watchdogCallbackListener() {
                     @Override
                     public void onWatchDogFinish(long code, String message) {
                         Message msg = Message.obtain();
@@ -200,7 +208,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                 }
                 progressBar.setVisibility(View.VISIBLE);
-                HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
+                HttpUtil.sendHttpRequest("https://api.diacloudsolutions.com.cn/devices", myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
 
                     @Override
                     public void onFinish(String response, int httpcode) {
@@ -208,6 +216,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         Message msg = Message.obtain();
                         msg.what = SEND_REQUEST;
                         msg.arg1 = httpcode;
+                        msg.obj=response;
                         handler.sendMessage(msg);
                     }
 
