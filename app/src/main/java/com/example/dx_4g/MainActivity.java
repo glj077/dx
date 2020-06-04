@@ -1,39 +1,28 @@
 package com.example.dx_4g;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.myApplication;
 import com.example.dx_4g.funclass.myToast;
-import com.example.dx_4g.funclass.watchdog;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
 
 import android.util.Base64;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +38,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private SharedPreferences.Editor editor;
     private  CheckBox userCheckBox;
     private CheckBox pasCheckBox;
+    private Runnable runnable;
 
 
     @SuppressLint("HandlerLeak")
@@ -57,7 +47,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             if (msg.what == SEND_REQUEST) {
                 if (msg.arg1==200) {
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     final Intent intent = new Intent(MainActivity.this, Main2Activity.class);
                     new Handler().postDelayed(new Runnable(){
                         public void run() {
@@ -70,7 +60,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
                 }
                 else{
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(MainActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
@@ -80,7 +70,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             }
             if (msg.what==SEND_REQUEST_ERR){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
+                //rewatch(handler,runnable);
                 new Handler().postDelayed(new Runnable(){
                     public void run() {
                         progressBar.setVisibility(View.GONE);
@@ -94,7 +85,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             }
             if(msg.what==WATCHDOG_FINISH){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 progressBar.setVisibility(View.GONE);
                 Toast mytoast=Toast.makeText(MainActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
@@ -148,7 +139,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     protected void onDestroy() {
         super.onDestroy();
-        watchdog.RemoveWatchDog(0);
+        RemoveWatchDog(handler,runnable);
         handler.removeCallbacksAndMessages(MainActivity.this);
         //watchdog.RemoveWatchDog();
     }
@@ -190,7 +181,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
                 editor.apply();
 
-                watchdog.watchdogRun(15000, new watchdogCallbackListener() {
+                watchdog(handler,runnable,15000, new watchdogCallbackListener() {
                     @Override
                     public void onWatchDogFinish(long code, String message) {
                         Message msg = Message.obtain();
@@ -201,6 +192,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     }
 
                 });
+
+
                 //输入法处理
                 InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
                 boolean isOpen = imm.isActive();
@@ -254,6 +247,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Pattern p =  Pattern.compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");//复杂匹配
         Matcher m = p.matcher(email);
         return m.matches();
+    }
+
+    private void watchdog(Handler handler,Runnable runnable,final long watchtime, final watchdogCallbackListener listener){
+        handler.postDelayed(runnable=new Runnable(){
+            public void run() {
+
+
+                    if (listener != null) {
+                        listener.onWatchDogFinish(watchtime, "无网络或服务器无响应");
+                    }
+
+
+            }
+        }, watchtime);
+    }
+
+
+    private void RemoveWatchDog(Handler handler,Runnable runnable){
+        handler.removeCallbacksAndMessages(runnable);
     }
 }
 

@@ -1,11 +1,9 @@
 package com.example.dx_4g;
 
 import android.annotation.SuppressLint;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -16,19 +14,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.WebView;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 
@@ -39,9 +33,7 @@ import com.example.dx_4g.funclass.DX_4G;
 import com.example.dx_4g.funclass.DX_Device;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
-import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
-import com.example.dx_4g.funclass.watchdog;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -77,6 +69,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     private TextView dx_show;
     private int search_view_dx_show;
     private  SwipeRefreshLayout mSwipe;
+    private Runnable runnable;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -86,20 +79,20 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                     String response = (String) msg.obj;
 
                     try {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         parseJSONWITHGSON(response);
                         mSwipe.setRefreshing(false);
 
 
                     } catch (JSONException e) {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         e.printStackTrace();
                         mSwipe.setRefreshing(false);
 
                     }
                 }
                 else{
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     mSwipe.setRefreshing(false);
                     Toast mytoast=Toast.makeText(Main2Activity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
@@ -110,7 +103,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             }
 
             if (msg.what==SEND_REQUEST_ERR){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 mSwipe.setRefreshing(false);
                 Toast.makeText(Main2Activity.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT).show();
 
@@ -118,7 +111,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
             }
 
             if(msg.what==WATCHDOG_FINISH){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 Toast mytoast=Toast.makeText(Main2Activity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();
@@ -162,7 +155,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                 list1.setAdapter(null);
                 initData();
 
-                watchdog.watchdogRun(10000, new watchdogCallbackListener() {
+                watchdog(handler,runnable,10000, new watchdogCallbackListener() {
                     @Override
                     public void onWatchDogFinish(long code, String message) {
                         Message msg = Message.obtain();
@@ -329,7 +322,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
         offline=0;
         search_view_dx_show=0;
 
-        watchdog.watchdogRun(15000, new watchdogCallbackListener() {
+        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();
@@ -444,6 +437,26 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     protected void onResume() {
         searchView.clearFocus();
         super.onResume();
+    }
+
+
+    private void watchdog(Handler handler,Runnable runnable,final long watchtime, final watchdogCallbackListener listener){
+        handler.postDelayed(runnable=new Runnable(){
+            public void run() {
+
+
+                if (listener != null) {
+                    listener.onWatchDogFinish(watchtime, "无网络或服务器无响应");
+                }
+
+
+            }
+        }, watchtime);
+    }
+
+
+    private void RemoveWatchDog(Handler handler,Runnable runnable){
+        handler.removeCallbacksAndMessages(runnable);
     }
 
 }

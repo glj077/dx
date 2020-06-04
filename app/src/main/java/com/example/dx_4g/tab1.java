@@ -12,7 +12,6 @@ import android.os.Message;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,17 +35,12 @@ import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.dx_4g.funclass.ActivityCollector;
-import com.example.dx_4g.funclass.DXDeviceAdapter;
 import com.example.dx_4g.funclass.DXDeviceRegAdapter;
 import com.example.dx_4g.funclass.DX_4G_Reg;
-import com.example.dx_4g.funclass.DX_Device;
 import com.example.dx_4g.funclass.DX_Device_Reg;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
-import com.example.dx_4g.funclass.RegCallBackListener;
-import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
-import com.example.dx_4g.funclass.watchdog;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -58,7 +52,6 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 public class tab1 extends Fragment {
    private SearchView searchView;
@@ -79,6 +72,7 @@ public class tab1 extends Fragment {
     private int search_sign;
     private ProgressBar progressBar;
     private int varNumber;
+    private Runnable runnable;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
@@ -219,11 +213,17 @@ public class tab1 extends Fragment {
                                     queryData.add(new DX_Device_Reg(mDataReg.get(i).getRegName(),mDataReg.get(i).getRegValue(),mDataReg.get(i).getRegAddr(),0,0));
                                 }
                             }
-
+                            if (!queryData.isEmpty()){
                             DXDeviceRegAdapter   DXARegdapter_query = new DXDeviceRegAdapter((LinkedList<DX_Device_Reg>) queryData, mContext);
                             listView.setAdapter(null);
                             listView.setAdapter(DXARegdapter_query);
                             search_sign=1;
+                            }else{
+                                Toast mytoast=Toast.makeText(getContext(),"未查到相关数据！",Toast.LENGTH_LONG);
+                                mytoast.setGravity(Gravity.CENTER,0,190);
+                                mytoast.show();
+                            }
+
                             //输入法处理
                             InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
                             boolean isOpen=imm.isActive();
@@ -262,12 +262,12 @@ public class tab1 extends Fragment {
                     String response = (String) msg.obj;
 
                     try {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         parseJSONWITHGSON(response);
                         mSwipe.setRefreshing(false);
                         progressBar.setVisibility(View.GONE);
                     } catch (JSONException e) {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         progressBar.setVisibility(View.GONE);
                         e.printStackTrace();
                         Toast mytoast = Toast.makeText(getContext(), "Code0:" + " Message:" + e.toString(), Toast.LENGTH_LONG);
@@ -276,7 +276,7 @@ public class tab1 extends Fragment {
                     }
                 }
                 else{
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     mSwipe.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
@@ -287,7 +287,7 @@ public class tab1 extends Fragment {
 
             }
             if (msg.what==SEND_REQUEST_ERR){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 mSwipe.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
@@ -302,14 +302,14 @@ public class tab1 extends Fragment {
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();}
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
             }
         }
     };
 
     private void readRegValue(int deviceID) {
 
-        watchdog.watchdogRun(20000, new watchdogCallbackListener() {
+        watchdog(handler,runnable,20000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();
@@ -420,6 +420,26 @@ public class tab1 extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         varNumber=0;
         super.onCreate(savedInstanceState);
+    }
+
+
+    private void watchdog(Handler handler,Runnable runnable,final long watchtime, final watchdogCallbackListener listener){
+        handler.postDelayed(runnable=new Runnable(){
+            public void run() {
+
+
+                if (listener != null) {
+                    listener.onWatchDogFinish(watchtime, "无网络或服务器无响应");
+                }
+
+
+            }
+        }, watchtime);
+    }
+
+
+    private void RemoveWatchDog(Handler handler,Runnable runnable){
+        handler.removeCallbacksAndMessages(runnable);
     }
 
 

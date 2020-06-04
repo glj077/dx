@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -22,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,16 +33,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.DXDeviceAlarmAdapter;
-import com.example.dx_4g.funclass.DXDeviceRegAdapter;
 import com.example.dx_4g.funclass.DX_4G_Alarm;
-import com.example.dx_4g.funclass.DX_4G_Reg;
 import com.example.dx_4g.funclass.DX_Device_Alarm;
-import com.example.dx_4g.funclass.DX_Device_Reg;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.myApplication;
-import com.example.dx_4g.funclass.myToast;
-import com.example.dx_4g.funclass.watchdog;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -74,6 +67,7 @@ public class tab3 extends Fragment {
     private ProgressBar progressBar;
     private  TextView alarm_querytext;
     private  String alarmQueryTimeShow;
+    private  Runnable runnable;
 
     /****************************************/
     //消息处理
@@ -86,13 +80,13 @@ public class tab3 extends Fragment {
                 if (msg.arg1==200) {
                     String response = (String) msg.obj;
                     try {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         parseJSONWITHGSON(response);
                         progressBar.setVisibility(View.GONE);
                         mSwipe.setRefreshing(false);
 
                     } catch (JSONException e) {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         mSwipe.setRefreshing(false);
                         e.printStackTrace();
                         progressBar.setVisibility(View.GONE);
@@ -103,7 +97,7 @@ public class tab3 extends Fragment {
 
                 }else{
                     mSwipe.setRefreshing(false);
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
@@ -112,7 +106,7 @@ public class tab3 extends Fragment {
 
             }
             if (msg.what==SEND_REQUEST_ERR){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 progressBar.setVisibility(View.GONE);
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
@@ -125,7 +119,7 @@ public class tab3 extends Fragment {
                 Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
                 mytoast.show();
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
             }
         }
     };
@@ -140,6 +134,7 @@ public class tab3 extends Fragment {
         listView=(ListView)view.findViewById(R.id.alarm_list);
         alarm_querytext=(TextView) view.findViewById(R.id.alarm_querytext);
         ImageView alarm_next_page=(ImageView)view.findViewById(R.id.alarm_next_page);
+        ImageView alarm_previous_page=(ImageView)view.findViewById(R.id.alarm_previous_page);
 
         myApplication.getInstance().setQuerytime(null);
         alarm_querytext.setText(getResources().getText(R.string.alarmquery_text));
@@ -288,6 +283,32 @@ public class tab3 extends Fragment {
 
      /******************************************/
 
+        /*******************************************/
+        /**********alarm_previous_page点击事件注册*******/
+
+        alarm_previous_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isInteger((String)alarm_page.getHint())){
+                    int alarepage=Integer.parseInt((String)alarm_page.getHint())-1;
+                    if (alarepage>=1) {
+                        alarm_page.setText(String.valueOf(alarepage));
+                    }
+                    else{
+                        Toast mytoast=Toast.makeText(getContext(),"已到第一页",Toast.LENGTH_LONG);
+                        mytoast.setGravity(Gravity.CENTER,0,190);
+                        mytoast.show();
+                        alarm_page.setHint("1");
+                    }
+                }
+
+            }
+
+        });
+
+        /******************************************/
+
+
 
      /*****************************************/
      /**************TextView事件注册***************/
@@ -320,7 +341,7 @@ public class tab3 extends Fragment {
             webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/alarms?"+alarmQueryTime+"& page="+alarmPage;
         }
 
-        watchdog.watchdogRun(15000, new watchdogCallbackListener() {
+        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
             @Override
             public void onWatchDogFinish(long code, String message) {
                 Message msg = Message.obtain();
@@ -415,5 +436,25 @@ public class tab3 extends Fragment {
         return pattern.matcher(str).matches();
     }
     /******************************************/
+
+
+    private void watchdog(Handler handler,Runnable runnable,final long watchtime, final watchdogCallbackListener listener){
+        handler.postDelayed(runnable=new Runnable(){
+            public void run() {
+
+
+                if (listener != null) {
+                    listener.onWatchDogFinish(watchtime, "无网络或服务器无响应");
+                }
+
+
+            }
+        }, watchtime);
+    }
+
+
+    private void RemoveWatchDog(Handler handler,Runnable runnable){
+        handler.removeCallbacksAndMessages(runnable);
+    }
 
 }

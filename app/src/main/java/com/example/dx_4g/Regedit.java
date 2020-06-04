@@ -1,13 +1,11 @@
 package com.example.dx_4g;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -27,15 +25,11 @@ import android.widget.Toast;
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
 import com.example.dx_4g.funclass.HttpCallbackListener;
-import com.example.dx_4g.funclass.HttpUtil;
 import com.example.dx_4g.funclass.HttpUtilPut;
 import com.example.dx_4g.funclass.JsonUtil;
 import com.example.dx_4g.funclass.RegValue;
 import com.example.dx_4g.funclass.myApplication;
-import com.example.dx_4g.funclass.watchdog;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +49,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     private  String regValuejsonString;
     private  EditText userValueEdit;
     private Toolbar toolbar;
+    private Runnable runnable;
 
     /********************************************/
     //消息处理
@@ -67,7 +62,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
                 try {
                     if (msg.arg1==202) {
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         int deviceID=myApplication.getInstance().getRegID();
                         final Intent intent=new Intent(Regedit.this,Main3Activity.class);
                         intent.putExtra("deviceID",deviceID);
@@ -82,7 +77,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
 
                     }
                     else{
-                        watchdog.RemoveWatchDog(0);
+                        RemoveWatchDog(handler,runnable);
                         progressBar.setVisibility(View.GONE);
                         Toast mytoast=Toast.makeText(Regedit.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                         mytoast.setGravity(Gravity.CENTER,0,190);
@@ -90,7 +85,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                     }
 
                 } catch (Exception e) {
-                    watchdog.RemoveWatchDog(0);
+                    RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
                     e.printStackTrace();
                     Toast mytoast=Toast.makeText(Regedit.this,"Code:0"+" Message:"+e.toString(),Toast.LENGTH_LONG);
@@ -99,7 +94,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                 }
             }
             if (msg.what==SEND_QUEST_ERR){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 progressBar.setVisibility(View.GONE);
                 Toast mytoast=Toast.makeText(Regedit.this,"code:"+msg.arg1+" "+(String)msg.obj,Toast.LENGTH_SHORT);
                 mytoast.setGravity(Gravity.CENTER,0,190);
@@ -107,7 +102,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
             }
 
             if(msg.what==WATCHDOG_FINISH){
-                watchdog.RemoveWatchDog(0);
+                RemoveWatchDog(handler,runnable);
                 progressBar.setVisibility(View.GONE);
                 Toast mytoast=Toast.makeText(Regedit.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                 mytoast.setGravity(Gravity.CENTER,0,190);
@@ -251,7 +246,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
                             regValuejsonString=JsonString(regAddr, regType, svvalue);
 
 
-                            watchdog.watchdogRun(15000, new watchdogCallbackListener() {
+                            watchdog(handler,runnable,15000, new watchdogCallbackListener() {
                                 @Override
                                 public void onWatchDogFinish(long code, String message) {
                                     Message msg = Message.obtain();
@@ -397,6 +392,26 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         textView.setText(regName);
         userValueEdit.setHint(regValue);
         super.onResume();
+    }
+
+
+    private void watchdog(Handler handler,Runnable runnable,final long watchtime, final watchdogCallbackListener listener){
+        handler.postDelayed(runnable=new Runnable(){
+            public void run() {
+
+
+                if (listener != null) {
+                    listener.onWatchDogFinish(watchtime, "无网络或服务器无响应");
+                }
+
+
+            }
+        }, watchtime);
+    }
+
+
+    private void RemoveWatchDog(Handler handler,Runnable runnable){
+        handler.removeCallbacksAndMessages(runnable);
     }
 
 
