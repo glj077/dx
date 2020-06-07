@@ -1,10 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReportActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar3"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="tab2"/>
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/myTheme"
+        app:popupTheme="@style/ToolBarPopTheme"
+        app:titleTextAppearance="@style/ToolbarTitle" />
+    <LinearLayout
+        android:id="@+id/report_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/searchView"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:id="@+id/report_previous_page"
+            android:src="@drawable/alarm_previous_page"
+            android:contentDescription="TODO" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/colorwhite"
+            android:layout_margin="5dp"
+            android:text="@string/alarm_page"/>
+        <EditText
+            android:id="@+id/report_edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:inputType="number"
+            android:textColor="@color/colorwhite"
+            android:textColorHint="@color/colorwhite"
+            android:layout_margin="5dp"
+            android:autofillHints="" />
+        <TextView
+            android:id="@+id/reporttotalpage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/colorwhite"
+            android:layout_margin="5dp"
+            android:text="@string/alarm_totalpage"/>
+        <TextView
+            android:id="@+id/reporttotalpageshow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textColor="@color/colorwhite"
+            android:layout_margin="5dp"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:id="@+id/report_next_page"
+            android:src="@drawable/alarm_next_page"
+            android:contentDescription="TODO" />
+
+    </LinearLayout>
+    <TextView
+        android:id="@+id/report_querytext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="left|center_vertical"
+        android:padding="5dp"
+        android:text="@string/alarmquery_text"
+        android:background="@drawable/alarm_querytext_style"
+        android:textColor="@color/colorwhite"
+        android:textSize="20sp"
+        android:drawableRight="@drawable/calendar"
+        android:clickable="true"
+        android:focusable="true"
+        tools:ignore="RtlHardcoded" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/text_frame"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="@string/alarm_listname"
+            android:textColor="@color/colorwhite"
+            android:textSize="25sp"
+            android:background="@drawable/text_frame"
+            android:layout_gravity="center"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:gravity="center"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/colorwhite"
+            android:background="@drawable/text_frame"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="25sp"
+            android:text="@string/alarm_listcount"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ProgressBar
+            android:id="@+id/progressBar4"
+            android:layout_width="69dp"
+            android:layout_height="41dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipelayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/report_list"/>
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </LinearLayout>

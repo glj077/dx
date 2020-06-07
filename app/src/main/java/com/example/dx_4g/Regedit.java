@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -50,20 +51,21 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     private  EditText userValueEdit;
     private Toolbar toolbar;
     private Runnable runnable;
+    private ImageView reportimage;
 
     /********************************************/
     //消息处理
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar);
+            final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar5);
             progressBar.setVisibility(View.VISIBLE);
             if (msg.what == SEND_QUEST) {
 
                 try {
                     if (msg.arg1==202) {
                         RemoveWatchDog(handler,runnable);
-                        int deviceID=myApplication.getInstance().getRegID();
+                        int deviceID=myApplication.getInstance().getDeviceID();
                         final Intent intent=new Intent(Regedit.this,Main3Activity.class);
                         intent.putExtra("deviceID",deviceID);
                         new Handler().postDelayed(new Runnable(){
@@ -129,6 +131,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     @Override
     protected void initView() {
         userValueEdit=(EditText)findViewById(R.id.editvalueshow);
+        reportimage=(ImageView)findViewById(R.id.report_image);
 
         /************************************/
         //标题栏设置
@@ -197,6 +200,19 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
             }
         });
 
+        /**
+        注册图片点击事件
+         */
+        reportimage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+             Intent intent=new Intent(Regedit.this,ReportActivity.class);
+             startActivity(intent);
+            }
+        });
+
+
 
         /**************************************/
         //ToolBar点击事件监听
@@ -228,6 +244,8 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         regType=getIntent().getIntExtra("regaddrtype",0);
         regName=getIntent().getStringExtra("regname");
         regValue=getIntent().getStringExtra("regvalue");
+        myApplication.getInstance().setRegID(regAddr);
+        myApplication.getInstance().setValuetype(regType);
         TextView textView=(TextView)findViewById(R.id.editaddrshow);
         textView.setText(regName);
         userValueEdit.setHint(regValue);
@@ -238,7 +256,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
          String svvalue=userValueEdit.getText().toString();
-         int DeviceID=myApplication.getInstance().getRegID();
+         int DeviceID=myApplication.getInstance().getDeviceID();
         switch (v.getId()){
             case R.id.exitok:
                 if (!svvalue.isEmpty()){

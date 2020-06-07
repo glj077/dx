@@ -86,7 +86,7 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
 
         final TabHost tabHost=(TabHost)findViewById(R.id.tab_host);//获取TabHost控件
         tabHost.setup();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             View view = LayoutInflater.from(this).inflate(R.layout.tabview, null, false);
             TextView tabviewtextView = (TextView) view.findViewById(R.id.tabveiw_text);
             ImageView imageView = (ImageView) view.findViewById(R.id.tabview_icon);
@@ -99,13 +99,13 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
                     imageView.setImageResource(R.drawable.reg1);
                     tabHost.addTab(tabHost.newTabSpec("tab1").setIndicator(view).setContent(R.id.tab1));
                     break;
+//                case 1:
+//                    tabviewtextView.setText("报表");
+//                    tabviewtextView1.setVisibility(View.GONE);
+//                    imageView.setImageResource(R.drawable.report1);
+//                    tabHost.addTab(tabHost.newTabSpec("tab2").setIndicator(view).setContent(R.id.tab2));
+//                    break;
                 case 1:
-                    tabviewtextView.setText("报表");
-                    tabviewtextView1.setVisibility(View.GONE);
-                    imageView.setImageResource(R.drawable.report1);
-                    tabHost.addTab(tabHost.newTabSpec("tab2").setIndicator(view).setContent(R.id.tab2));
-                    break;
-                case 2:
                     tabviewtextView.setText("报警");
                     imageView.setImageResource(R.drawable.alarm1);
                     tabHost.addTab(tabHost.newTabSpec("tab3").setIndicator(view).setContent(R.id.tab3));
@@ -122,14 +122,14 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
                 //以下为动态改变文本颜色，可以使用选择器来实现
                 //全部恢复初始色
 
-                for(int i=0;i<3;i++){
+                for(int i=0;i<2;i++){
                     ImageView imageView=(ImageView)tabHost.getTabWidget().getChildTabViewAt(i).findViewById(R.id.tabview_icon);
                     switch (i){
                         case 0: imageView.setImageResource(R.drawable.reg1);
+//                            break;
+//                        case 1: imageView.setImageResource(R.drawable.report1);
                             break;
-                        case 1: imageView.setImageResource(R.drawable.report1);
-                            break;
-                        case 2: imageView.setImageResource(R.drawable.alarm1);
+                        case 1: imageView.setImageResource(R.drawable.alarm1);
                             break;
 
                     }
@@ -151,12 +151,12 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
                         fragmentTransaction.replace(R.id.fram,tab1fragment,"tag1");
                         fragmentTransaction.commit();
                         break;
-                    case "tab2":
-                        ((ImageView)tabHost.getCurrentTabView().findViewById(R.id.tabview_icon)).setImageResource(R.drawable.report);
-                       tab2 tab2fragment = new tab2();
-                       fragmentTransaction.replace(R.id.fram,tab2fragment,"tag2");
-                       fragmentTransaction.commit();
-                        break;
+//                    case "tab2":
+//                        ((ImageView)tabHost.getCurrentTabView().findViewById(R.id.tabview_icon)).setImageResource(R.drawable.report);
+//                       tab2 tab2fragment = new tab2();
+//                       fragmentTransaction.replace(R.id.fram,tab2fragment,"tag2");
+//                       fragmentTransaction.commit();
+//                        break;
                     case "tab3":
                         ((ImageView)tabHost.getCurrentTabView().findViewById(R.id.tabview_icon)).setImageResource(R.drawable.alarm);
                         tab3 tab3fragment = new tab3();
@@ -169,14 +169,14 @@ public class Main3Activity extends BaseActivity implements View.OnClickListener 
         });
 
         //初次进入第一个TAB颜色
-        for(int i=0;i<3;i++){
+        for(int i=0;i<2;i++){
             ImageView imageView=(ImageView)tabHost.getTabWidget().getChildTabViewAt(i).findViewById(R.id.tabview_icon);
             switch (i){
                 case 0: imageView.setImageResource(R.drawable.reg);
                     break;
-                case 1: imageView.setImageResource(R.drawable.report1);
-                    break;
-                case 2: imageView.setImageResource(R.drawable.alarm1);
+//                case 1: imageView.setImageResource(R.drawable.report1);
+//                    break;
+                case 1: imageView.setImageResource(R.drawable.alarm1);
                     break;
 
             }

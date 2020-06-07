@@ -4,11 +4,16 @@ import android.app.Application;
 import android.content.Context;
 import android.net.IpSecManager;
 
+import androidx.annotation.InspectableProperty;
+
 public class myApplication extends Application {
     private  static  myApplication mApp;
     private static Context context;
     private  String pasbas64;
+    private int deviceID;
     private int regID;
+    private int valuetype;
+
     private String deviceName;
     private String querytime;
 
@@ -23,10 +28,14 @@ public class myApplication extends Application {
     public   void setPasbas64(String pasbas64){
         this.pasbas64=pasbas64;
     }
-    public int getRegID(){return regID;}
-    public  void setRegID(int regID){this.regID=regID;}
+    public int getDeviceID(){return deviceID;}
+    public  void setDeviceID(int deviceID){this.deviceID=deviceID;}
     public void setQuerytime(String querytime){this.querytime=querytime;}
     public void setDeviceName(String deviceName){this.deviceName=deviceName;}
+    public int getRegID(){return regID;}
+    public void setRegID(int regID){this.regID=regID;}
+    public  int getValuetype(){return valuetype;}
+    public void setValuetype(int valuetype){this.valuetype=valuetype;}
 
 
     @Override

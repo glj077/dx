@@ -189,7 +189,7 @@ public class tab3 extends Fragment {
 
          /*************************************/
          //页面加载数据
-        int deviceID= myApplication.getInstance().getRegID();
+        int deviceID= myApplication.getInstance().getDeviceID();
         readRegValue(deviceID,1,null);
         progressBar=getActivity().findViewById(R.id.progressBar3);
         progressBar.setVisibility(View.VISIBLE);
@@ -213,7 +213,7 @@ public class tab3 extends Fragment {
             public void onRefresh() {
                 listView.setAdapter(null);
                 alarm_querytext.setText(getResources().getText(R.string.alarmquery_text));
-                int devicdID= myApplication.getInstance().getRegID();
+                int devicdID= myApplication.getInstance().getDeviceID();
                 myApplication.getInstance().setQuerytime(null);
                 readRegValue(devicdID,1,null);
                 mSwipe.postDelayed(new Runnable() {
@@ -247,7 +247,7 @@ public class tab3 extends Fragment {
          public void afterTextChanged(Editable s) {
              if (isInteger((String)s.toString())){
              int alarepage=Integer.parseInt((String)s.toString());
-             int deviceID= myApplication.getInstance().getRegID();
+             int deviceID= myApplication.getInstance().getDeviceID();
 
              progressBar=getActivity().findViewById(R.id.progressBar3);
              progressBar.setVisibility(View.VISIBLE);
@@ -408,7 +408,7 @@ public class tab3 extends Fragment {
         mDataAlarm = new LinkedList<DX_Device_Alarm>();
 
         for(int i=0;i<RegValue.size();i++){
-                mDataAlarm.add(new DX_Device_Alarm(dataBeansAlarm.get(i).getTitle(),dataBeansAlarm.get(i).getContent()));
+                mDataAlarm.add(new DX_Device_Alarm(RegValue.get(i).getTitle(),RegValue.get(i).getContent()));
         }
     }
 
@@ -420,7 +420,7 @@ public class tab3 extends Fragment {
             alarm_querytext.setText(alarmQueryTimeShow);
         }
         listView.setAdapter(null);
-        int devicedID= myApplication.getInstance().getRegID();
+        int devicedID= myApplication.getInstance().getDeviceID();
         progressBar.setVisibility(View.VISIBLE);
         readRegValue(devicedID,1,myApplication.getInstance().getQuerytime());
         super.onResume();

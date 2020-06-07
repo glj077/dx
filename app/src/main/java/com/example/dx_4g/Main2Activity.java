@@ -299,11 +299,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
                      deviceName=mData_online.get(position).getDxName();
                      deviceID=mData_online.get(position).getDxID();
              }
-             myApplication.getInstance().setRegID(deviceID);
+             myApplication.getInstance().setDeviceID(deviceID);
              myApplication.getInstance().setDeviceName(deviceName);
              Intent intent=new Intent(Main2Activity.this,Main3Activity.class);
             intent.putExtra("deviceID",deviceID);
              intent.putExtra("devieName",deviceName);
+
              startActivity(intent);
              finish();
          }
@@ -315,7 +316,7 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void initData()  {
         myApplication.getInstance().setQuerytime(null);
-        myApplication.getInstance().setRegID(0);
+        myApplication.getInstance().setDeviceID(0);
 
         mData_online = new LinkedList<DX_Device>();
         online=0;

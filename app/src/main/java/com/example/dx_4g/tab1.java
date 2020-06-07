@@ -162,7 +162,7 @@ public class tab1 extends Fragment {
         });
        /*********************************************/
        //页面初始数据加载
-        int devicdID= myApplication.getInstance().getRegID();
+        int devicdID= myApplication.getInstance().getDeviceID();
 
             readRegValue(devicdID);
             progressBar=getActivity().findViewById(R.id.progressBar3);
@@ -182,7 +182,7 @@ public class tab1 extends Fragment {
             @Override
             public void onRefresh() {
                 listView.setAdapter(null);
-                int devicdID= myApplication.getInstance().getRegID();
+                int devicdID= myApplication.getInstance().getDeviceID();
 
 
                 readRegValue(devicdID);
@@ -279,6 +279,7 @@ public class tab1 extends Fragment {
                     RemoveWatchDog(handler,runnable);
                     mSwipe.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
+
                     Toast mytoast=Toast.makeText(getContext(),"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
                     mytoast.show();
@@ -367,18 +368,18 @@ public class tab1 extends Fragment {
         for(int i=0;i<RegValue.size();i++){
             varNumber=varNumber+1;
             if(i==RegValue.size()-1){
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(),0,0));
+                mDataReg.add(new DX_Device_Reg(RegValue.get(i).getName(),String.valueOf(RegValue.get(i).getValue()),RegValue.get(i).getAddr(),0,0));
                 break;
             }
             if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()==null)){
-                float dx_regvalue=intToFloat(dataBeansReg.get(i+1).getValue(),dataBeansReg.get(i).getValue());
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(),String.valueOf(dx_regvalue),dataBeansReg.get(i).getAddr(),0,1));
+                float dx_regvalue=intToFloat(RegValue.get(i+1).getValue(),RegValue.get(i).getValue());
+                mDataReg.add(new DX_Device_Reg(RegValue.get(i).getName(),String.valueOf(dx_regvalue),RegValue.get(i).getAddr(),0,1));
                 i=i+1;
                 continue;
             }
 
             if ((RegValue.get(i).getTemplate()!=null)&&(RegValue.get(i+1).getTemplate()!=null)) {
-                mDataReg.add(new DX_Device_Reg(dataBeansReg.get(i).getName(), String.valueOf(dataBeansReg.get(i).getValue()),dataBeansReg.get(i).getAddr(), 0,0));
+                mDataReg.add(new DX_Device_Reg(RegValue.get(i).getName(), String.valueOf(RegValue.get(i).getValue()),RegValue.get(i).getAddr(), 0,0));
 
             }
 
@@ -411,7 +412,7 @@ public class tab1 extends Fragment {
         varNumber=0;
         listView.setAdapter(null);
         progressBar.setVisibility(View.VISIBLE);
-        int devicdID= myApplication.getInstance().getRegID();
+        int devicdID= myApplication.getInstance().getDeviceID();
         readRegValue(devicdID);
         super.onResume();
     }

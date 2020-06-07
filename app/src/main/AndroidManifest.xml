@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".ReportActivity"></activity>
         <activity android:name=".Regedit" />
         <activity android:name=".Main4Activity" />
         <activity android:name=".Main3Activity" />
