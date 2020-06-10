@@ -14,16 +14,20 @@ public abstract class BaseActivity extends AppCompatActivity {
        //setSupportTollBar();
        initView();
 
+
        try {
            initData();
        } catch (httpopenException e) {
            e.printStackTrace();
+       } catch (InterruptedException e) {
+           e.printStackTrace();
        }
+
 
    }
    protected abstract int getLayoutId();
    protected abstract void initView();
-   protected abstract void initData() throws httpopenException;
+   protected abstract void initData() throws httpopenException, InterruptedException;
 
     @Override
     protected void onResume() {

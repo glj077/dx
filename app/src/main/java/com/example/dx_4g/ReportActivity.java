@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ThemedSpinnerAdapter;
 import android.widget.Toast;
 
 import com.example.dx_4g.funclass.ActivityCollector;
@@ -38,7 +40,9 @@ import com.example.dx_4g.funclass.DXDeviceReportAdapter;
 import com.example.dx_4g.funclass.DX_4G_Report;
 import com.example.dx_4g.funclass.DX_Device_Report;
 import com.example.dx_4g.funclass.HttpCallbackListener;
+import com.example.dx_4g.funclass.HttpCallbackListenerReponsCode;
 import com.example.dx_4g.funclass.HttpUtil;
+import com.example.dx_4g.funclass.HttpUtilReponseCode;
 import com.example.dx_4g.funclass.httpopenException;
 import com.example.dx_4g.funclass.myApplication;
 import com.example.dx_4g.funclass.watchdogCallbackListener;
@@ -49,20 +53,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
 public class ReportActivity extends BaseActivity {
 
 
-    private static final int SEND_REQUEST=8;
-    private static final int SEND_REQUEST_ERR=9;
-    private static final int WATCHDOG_FINISH=10;
-    private static final int SEND_REQUEST1=11;
-    private static final int SEND_REQUEST_ERR1=12;
+    private static final int SEND_REQUEST=1;
+    private static final int SEND_REQUEST_ERR=2;
+    private static final int WATCHDOG_FINISH=3;
+    private static final int READ_FINISH=4;
     private List<List<String>> dataBeansReport;
+    private List<List<String>> dataBeansReport2;
     private LinkedList<DX_Device_Report> mDataReport;
+    private LinkedList<DX_Device_Report> mDataReport1;
     private EditText reportPage;
     private TextView reportToatlPage;
     private ListView listView;
@@ -75,6 +82,21 @@ public class ReportActivity extends BaseActivity {
     private  String reportQueryTimeShow;
     private  Runnable runnable;
 
+    private int page,page1;
+
+    private int pageCount;
+
+    private int sign;
+
+    private  CountDownLatch  countDownLatch;
+    private CountDownLatch countDownLatch1;
+    private CountDownLatch countDownLatch2;
+    private CountDownLatch countDownLatch3;
+    private CountDownLatch countDownLatch4;
+    private CountDownLatch countDownLatch5;
+
+
+    private int[] pa=new int[3];
 
     @Override
     protected int getLayoutId() {
@@ -286,14 +308,75 @@ public class ReportActivity extends BaseActivity {
     }
 
     @Override
-    protected void initData() throws httpopenException {
-        int deviceID=myApplication.getInstance().getDeviceID();
-        int regID=myApplication.getInstance().getRegID();
+    protected void initData() throws httpopenException, InterruptedException {
+        mDataReport = new LinkedList<>();
+        mDataReport1=new LinkedList<>();
+        final int deviceID=myApplication.getInstance().getDeviceID();
+        final int regID=myApplication.getInstance().getRegID();
         int valueType=myApplication.getInstance().getValuetype();
         progressBar.setVisibility(View.VISIBLE);
-        readRegValue(deviceID,regID,1,valueType,null);
+        //定义线程定时器
 
-    }
+        if (valueType==0) {
+            countDownLatch=new CountDownLatch(1);
+            readRegValue(deviceID, regID, 1, valueType, null);
+        }else {
+            countDownLatch=new CountDownLatch(2);
+
+            /**
+             * 线程1读取第一个地址的页数
+             */
+            new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                      readRegValue1(deviceID, regID, 1, 0, null,1);
+
+                  }
+              }).start();
+
+            /**
+             * 线程2读取第二个地址的页数
+             */
+
+            new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                      try {
+                          Thread.sleep(300);
+                      } catch (InterruptedException e) {
+                          e.printStackTrace();
+                      }
+                      readRegValue1(deviceID, regID+1, 1, 0, null,2);
+                  }
+              }).start();
+
+            /**
+             * 测试
+             */
+            new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                      try {
+                          countDownLatch.await();
+                          Message msg=Message.obtain();
+                          msg.what=READ_FINISH;
+                          msg.arg1=pa[1]+pa[0];
+                          handler.sendMessage(msg);
+                      } catch (InterruptedException e) {
+                          e.printStackTrace();
+                      }
+
+
+                  }
+              }).start();
+
+
+        }
+        }
+
+
+
+
 
 
 
@@ -302,52 +385,102 @@ public class ReportActivity extends BaseActivity {
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
+            switch (msg.what){
 
-            if (msg.what == SEND_REQUEST) {
+                case SEND_REQUEST:
+                    if (msg.arg1==200) {
+                        String response = (String) msg.obj;
+                        try {
 
-                if (msg.arg1==200) {
-                    String response = (String) msg.obj;
-                    try {
-                        RemoveWatchDog(handler,runnable);
-                        parseJSONWITHGSON(response);
-                        progressBar.setVisibility(View.GONE);
-                        mSwipe.setRefreshing(false);
+                            if(myApplication.getInstance().getValuetype()==0) {
+                                parseJSONWITHGSON(response);
+                            }
 
-                    } catch (JSONException e) {
-                        RemoveWatchDog(handler,runnable);
-                        mSwipe.setRefreshing(false);
-                        e.printStackTrace();
-                        progressBar.setVisibility(View.GONE);
-                        Toast mytoast=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast mytoast=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            mytoast.setGravity(Gravity.CENTER,0,190);
+                            mytoast.show();
+                        }
+
+                    }else{
+                        Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                         mytoast.setGravity(Gravity.CENTER,0,190);
                         mytoast.show();
                     }
-
-                }else{
+                    RemoveWatchDog(handler,runnable);
                     mSwipe.setRefreshing(false);
+                    progressBar.setVisibility(View.GONE);
+                    countDownLatch.countDown();
+                    break;
+
+                case SEND_REQUEST_ERR:
                     RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                     mytoast.setGravity(Gravity.CENTER,0,190);
                     mytoast.show();
-                }
+                    break;
 
-            }
-            if (msg.what==SEND_REQUEST_ERR){
-                RemoveWatchDog(handler,runnable);
-                progressBar.setVisibility(View.GONE);
-                Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
-                mytoast.setGravity(Gravity.CENTER,0,190);
-                mytoast.show();
-            }
+                case WATCHDOG_FINISH:
+                    mSwipe.setRefreshing(false);
+                    progressBar.setVisibility(View.GONE);
+                    Toast mytoast1=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                    mytoast1.setGravity(Gravity.CENTER,0,190);
+                    mytoast1.show();
+                    RemoveWatchDog(handler,runnable);
+                    break;
+                case READ_FINISH:
+                    Toast.makeText(ReportActivity.this,msg.arg1+"",Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.GONE);
+                    break;
 
-            if(msg.what==WATCHDOG_FINISH){
+                case 11:
+                    if (msg.arg1==200) {
+                        String response = (String) msg.obj;
+                        try {
+                            pa[0] = isPageNumber(response);
 
-                progressBar.setVisibility(View.GONE);
-                Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
-                mytoast.setGravity(Gravity.CENTER,0,190);
-                mytoast.show();
-                RemoveWatchDog(handler,runnable);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast mytoast4=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            mytoast4.setGravity(Gravity.CENTER,0,190);
+                            mytoast4.show();
+                        }
+                    }
+                    else{
+                        Toast mytoast2=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        mytoast2.setGravity(Gravity.CENTER,0,190);
+                        mytoast2.show();
+                    }
+                    countDownLatch.countDown();
+                    break;
+                case 12:
+                    if (msg.arg1==200) {
+                        String response = (String) msg.obj;
+                        try {
+                            pa[1] = isPageNumber(response);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast mytoast5=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            mytoast5.setGravity(Gravity.CENTER,0,190);
+                            mytoast5.show();
+                        }
+                    }
+                    else{
+                        Toast mytoast3=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        mytoast3.setGravity(Gravity.CENTER,0,190);
+                        mytoast3.show();
+                    }
+                    countDownLatch.countDown();
+                    break;
+
+
+
+
+
+
+          //以下是SWITCH末尾
             }
         }
     };
@@ -360,35 +493,36 @@ public class ReportActivity extends BaseActivity {
 
     private void readRegValue(int deviceID,int regID,int reportPage,int valuetype,String reportQueryTime) {
         String webAddr = null;
-        String webAddr1=null;
         if (valuetype==0){
             if (reportQueryTime==null) {
-                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportPage;
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?page="+reportPage;
             }else{
-                    webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportQueryTime+"& page="+reportPage;
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportQueryTime+"& page="+reportPage;
 
             }
         }
         if (valuetype==1){
             if (reportQueryTime==null){
-                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportPage;
-                webAddr1 = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+(regID+1)+"/history?"+reportPage;
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?page="+reportPage;
+
+            }else{
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportQueryTime+"& page="+reportPage;
             }
 
         }
 
 
-        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
-            @Override
-            public void onWatchDogFinish(long code, String message) {
-                Message msg = Message.obtain();
-                msg.what = WATCHDOG_FINISH;
-                msg.arg1 =(int)(code);
-                msg.obj=message;
-                handler.sendMessage(msg);
-            }
-
-        });
+//        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
+//            @Override
+//            public void onWatchDogFinish(long code, String message) {
+//                Message msg = Message.obtain();
+//                msg.what = WATCHDOG_FINISH;
+//                msg.arg1 =(int)(code);
+//                msg.obj=message;
+//                handler.sendMessage(msg);
+//            }
+//
+//        });
 
 
 
@@ -400,7 +534,9 @@ public class ReportActivity extends BaseActivity {
                 msg.what = SEND_REQUEST;
                 msg.obj = response;
                 msg.arg1=httpcode;
+
                 handler.sendMessage(msg);
+
             }
 
             @Override
@@ -409,38 +545,89 @@ public class ReportActivity extends BaseActivity {
                 msg.what = SEND_REQUEST_ERR;
                 msg.obj = httpmessage;
                 msg.arg1=httpcode;
+
                 handler.sendMessage(msg);
             }
         });
 
-        HttpUtil.sendHttpRequest(webAddr1, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
+    }
+
+
+    /**
+     *
+     * test
+     * test
+     */
+    private void readRegValue1(int deviceID, int regID, int reportPage, int valuetype, String reportQueryTime, final int rcode) {
+        String webAddr = null;
+        if (valuetype==0){
+            if (reportQueryTime==null) {
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?page="+reportPage;
+            }else{
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportQueryTime+"& page="+reportPage;
+
+            }
+        }
+        if (valuetype==1){
+            if (reportQueryTime==null){
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?page="+reportPage;
+
+            }else{
+                webAddr = "https://api.diacloudsolutions.com.cn/devices/" + deviceID + "/regs/"+regID+"/history?"+reportQueryTime+"& page="+reportPage;
+            }
+
+        }
+
+
+//        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
+//            @Override
+//            public void onWatchDogFinish(long code, String message) {
+//                Message msg = Message.obtain();
+//                msg.what = WATCHDOG_FINISH;
+//                msg.arg1 =(int)(code);
+//                msg.obj=message;
+//                handler.sendMessage(msg);
+//            }
+//
+//        });
+
+
+
+
+        HttpUtilReponseCode.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListenerReponsCode() {
+
             @Override
-            public void onFinish(String response,int httpcode) {
+            public void onFinish(String response, int httpcode, int reponsecode) {
                 Message msg = Message.obtain();
-                msg.what = SEND_REQUEST1;
+                msg.what = reponsecode+rcode;
                 msg.obj = response;
                 msg.arg1=httpcode;
                 handler.sendMessage(msg);
+
+
             }
 
             @Override
-            public void onError(int httpcode,String httpmessage) {
+            public void onError(int httpcode, String httpmessage, int reponsecode) {
                 Message msg = Message.obtain();
-                msg.what = SEND_REQUEST_ERR1;
+                msg.what = reponsecode+rcode;
                 msg.obj = httpmessage;
                 msg.arg1=httpcode;
                 handler.sendMessage(msg);
             }
         });
 
-
-
-
-
-
-
-        
     }
+
+
+
+
+
+
+
+
+
+    /************************************************/
 
     private void parseJSONWITHGSON(String jsonData) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
@@ -469,11 +656,53 @@ public class ReportActivity extends BaseActivity {
 
     }
 
+
+
+    private void parseJSONWITHGSON1(String jsonData) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
+        JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
+        JSONObject jsonArray1=jsonObject.getJSONObject("paging");
+        Gson gson = new Gson();
+        dataBeansReport = gson.fromJson(jsonArray.toString(), new TypeToken<List<List<String>>>() {
+        }.getType());
+        RegValueHandle(dataBeansReport);
+    }
+
+    private void parseJSONWITHGSON2(String jsonData) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
+        JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
+        Gson gson = new Gson();
+        dataBeansReport2 = gson.fromJson(jsonArray.toString(), new TypeToken<List<List<String>>>() {
+        }.getType());
+        RegValueHandle1(dataBeansReport2);
+    }
+
+    /**
+     *
+     * @param jsonData
+     * @return int 查询数据的页数
+     * @throws JSONException
+     */
+    private int isPageNumber(String jsonData) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
+        JSONObject jsonArray1=jsonObject.getJSONObject("paging");
+        return  Integer.parseInt(jsonArray1.getString("pageCount"));
+    }
+
+
+
+
     private  void RegValueHandle(List<List<String>> RegValue){
-        mDataReport = new LinkedList<>();
 
         for(int i=0;i<RegValue.size();i++){
             mDataReport.add(new DX_Device_Report(RegValue.get(i).get(0),Integer.parseInt(RegValue.get(i).get(3))));
+        }
+    }
+
+    private  void RegValueHandle1(List<List<String>> RegValue){
+
+        for(int i=0;i<RegValue.size();i++){
+            mDataReport1.add(new DX_Device_Report(RegValue.get(i).get(0),Integer.parseInt(RegValue.get(i).get(3))));
         }
     }
 
