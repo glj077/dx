@@ -95,6 +95,8 @@ public class ReportActivity extends BaseActivity {
     private CountDownLatch countDownLatch4;
     private CountDownLatch countDownLatch5;
 
+    private int readError;
+
 
     private int[] pa=new int[3];
 
@@ -322,6 +324,7 @@ public class ReportActivity extends BaseActivity {
             readRegValue(deviceID, regID, 1, valueType, null);
         }else {
             countDownLatch=new CountDownLatch(2);
+            countDownLatch3=new CountDownLatch(2);
 
             /**
              * 线程1读取第一个地址的页数
@@ -350,6 +353,53 @@ public class ReportActivity extends BaseActivity {
                   }
               }).start();
 
+
+            /**
+             * 线程3读取第一个地址的数据
+             */
+             new Thread(new Runnable() {
+                 @Override
+                 public void run() {
+                     try {
+                         mDataReport.clear();
+                         countDownLatch.await();
+                         for (int i=1;i<=pa[0];i++) {
+                             countDownLatch1=new CountDownLatch(1);
+                             readRegValue1(deviceID, regID, i, 0, null, 3);
+                             countDownLatch1.await();
+                         }
+                     } catch (InterruptedException e) {
+                         e.printStackTrace();
+                     }
+                    countDownLatch3.countDown();
+
+                 }
+             }).start();
+
+            /**
+             * 线程4读取第二个地址的数据
+             */
+             new Thread(new Runnable() {
+                 @Override
+                 public void run() {
+                     try {
+                         mDataReport1.clear();
+                         countDownLatch.await();
+                         for (int i=1;i<=pa[1];i++) {
+                             countDownLatch2=new CountDownLatch(1);
+                             readRegValue1(deviceID, regID+1, i, 0, null, 4);
+                             countDownLatch2.await();
+                         }
+                     } catch (InterruptedException e) {
+                         e.printStackTrace();
+                     }
+                     countDownLatch3.countDown();
+
+                 }
+             }).start();
+
+
+
             /**
              * 测试
              */
@@ -357,10 +407,11 @@ public class ReportActivity extends BaseActivity {
                   @Override
                   public void run() {
                       try {
-                          countDownLatch.await();
+                          countDownLatch3.await();
                           Message msg=Message.obtain();
                           msg.what=READ_FINISH;
-                          msg.arg1=pa[1]+pa[0];
+                          msg.arg1=mDataReport.size();
+                          msg.arg2=mDataReport1.size();
                           handler.sendMessage(msg);
                       } catch (InterruptedException e) {
                           e.printStackTrace();
@@ -397,6 +448,7 @@ public class ReportActivity extends BaseActivity {
                             }
 
                         } catch (JSONException e) {
+                            readError=readError+1;
                             e.printStackTrace();
                             Toast mytoast=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
                             mytoast.setGravity(Gravity.CENTER,0,190);
@@ -404,6 +456,7 @@ public class ReportActivity extends BaseActivity {
                         }
 
                     }else{
+                        readError=readError+1;
                         Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                         mytoast.setGravity(Gravity.CENTER,0,190);
                         mytoast.show();
@@ -415,6 +468,7 @@ public class ReportActivity extends BaseActivity {
                     break;
 
                 case SEND_REQUEST_ERR:
+                    readError=readError+1;
                     RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
@@ -431,7 +485,7 @@ public class ReportActivity extends BaseActivity {
                     RemoveWatchDog(handler,runnable);
                     break;
                 case READ_FINISH:
-                    Toast.makeText(ReportActivity.this,msg.arg1+"",Toast.LENGTH_LONG).show();
+                    Toast.makeText(ReportActivity.this,msg.arg1+" "+msg.arg2,Toast.LENGTH_LONG).show();
                     progressBar.setVisibility(View.GONE);
                     break;
 
@@ -442,6 +496,7 @@ public class ReportActivity extends BaseActivity {
                             pa[0] = isPageNumber(response);
 
                         } catch (JSONException e) {
+                            readError=readError+1;
                             e.printStackTrace();
                             Toast mytoast4=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
                             mytoast4.setGravity(Gravity.CENTER,0,190);
@@ -449,6 +504,7 @@ public class ReportActivity extends BaseActivity {
                         }
                     }
                     else{
+                        readError=readError+1;
                         Toast mytoast2=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                         mytoast2.setGravity(Gravity.CENTER,0,190);
                         mytoast2.show();
@@ -461,6 +517,7 @@ public class ReportActivity extends BaseActivity {
                         try {
                             pa[1] = isPageNumber(response);
                         } catch (JSONException e) {
+                            readError=readError+1;
                             e.printStackTrace();
                             Toast mytoast5=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
                             mytoast5.setGravity(Gravity.CENTER,0,190);
@@ -468,13 +525,55 @@ public class ReportActivity extends BaseActivity {
                         }
                     }
                     else{
+                        readError=readError+1;
                         Toast mytoast3=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
                         mytoast3.setGravity(Gravity.CENTER,0,190);
                         mytoast3.show();
                     }
                     countDownLatch.countDown();
                     break;
-
+                case 13:
+                    if (msg.arg1==200) {
+                        String response = (String) msg.obj;
+                        try {
+                            parseJSONWITHGSON1(response);
+                        } catch (JSONException e) {
+                            readError=readError+1;
+                            e.printStackTrace();
+                            Toast mytoast6=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            mytoast6.setGravity(Gravity.CENTER,0,190);
+                            mytoast6.show();
+                        }
+                    }
+                    else{
+                        readError=readError+1;
+                        Toast mytoast7=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        mytoast7.setGravity(Gravity.CENTER,0,190);
+                        mytoast7.show();
+                    }
+                    countDownLatch1.countDown();
+                    break;
+                case 14:
+                    if (msg.arg1==200) {
+                        String response = (String) msg.obj;
+                        try {
+                            parseJSONWITHGSON2(response);
+                        } catch (JSONException e) {
+                            readError=readError+1;
+                            e.printStackTrace();
+                            Toast mytoast8=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            mytoast8.setGravity(Gravity.CENTER,0,190);
+                            mytoast8.show();
+                        }
+                    }
+                    else{
+                        readError=readError+1;
+                        Toast mytoast9=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        mytoast9.setGravity(Gravity.CENTER,0,190);
+                        mytoast9.show();
+                    }
+                    countDownLatch2.countDown();
+                    break;
 
 
 
