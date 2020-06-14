@@ -16,9 +16,11 @@ public class myApplication extends Application {
 
     private String deviceName;
     private String querytime;
+    private String RegName;
 
     public String getDeviceName(){return  deviceName;}
     public String getQuerytime(){return  querytime;}
+    public String getRegName(){return  RegName;}
     public  static myApplication getInstance(){
         return mApp;
     }
@@ -36,6 +38,7 @@ public class myApplication extends Application {
     public void setRegID(int regID){this.regID=regID;}
     public  int getValuetype(){return valuetype;}
     public void setValuetype(int valuetype){this.valuetype=valuetype;}
+    public void setRegName(String RegName){this.RegName=RegName;}
 
 
     @Override

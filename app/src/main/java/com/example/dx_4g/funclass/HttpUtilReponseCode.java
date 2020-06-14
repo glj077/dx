@@ -29,8 +29,8 @@ public class HttpUtilReponseCode {
                     connection.addRequestProperty("Accept", "application/json");
                     connection.addRequestProperty("Content-Type", "application/json");
                     connection.addRequestProperty("Authorization", pasBase64);
-                    connection.setReadTimeout(20000);
-                    connection.setConnectTimeout(20000);
+                    connection.setReadTimeout(30000);
+                    connection.setConnectTimeout(30000);
                     connection.setUseCaches(false);
                     //connection.setDoInput(true);
                     //connection.setDoOutput(true);

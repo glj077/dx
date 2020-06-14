@@ -1,44 +1,37 @@
 package com.example.dx_4g;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.ThemedSpinnerAdapter;
 import android.widget.Toast;
 
 import com.example.dx_4g.funclass.ActivityCollector;
 import com.example.dx_4g.funclass.BaseActivity;
+import com.example.dx_4g.funclass.DXDeviceMReportAdapter;
 import com.example.dx_4g.funclass.DXDeviceReportAdapter;
 import com.example.dx_4g.funclass.DX_4G_Report;
 import com.example.dx_4g.funclass.DX_Device_Report;
+import com.example.dx_4g.funclass.DX_Device_mReport;
 import com.example.dx_4g.funclass.HttpCallbackListener;
 import com.example.dx_4g.funclass.HttpCallbackListenerReponsCode;
 import com.example.dx_4g.funclass.HttpUtil;
@@ -53,8 +46,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
-import java.util.LinkedList;
+import java.math.BigInteger;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
@@ -66,34 +63,38 @@ public class ReportActivity extends BaseActivity {
     private static final int SEND_REQUEST_ERR=2;
     private static final int WATCHDOG_FINISH=3;
     private static final int READ_FINISH=4;
+    private static final int READ_ADDR1_PAGE_FINISH=11;
+    private static final int READ_ADDR2_PAGE_FINISH=12;
+    private static final int READ_ADDR1_DATA_FINISH=13;
+    private static final int READ_ADDR2_DATA_FINISH=14;
+    private static final int READ_ERROR =5;
+
     private List<List<String>> dataBeansReport;
     private List<List<String>> dataBeansReport2;
-    private LinkedList<DX_Device_Report> mDataReport;
-    private LinkedList<DX_Device_Report> mDataReport1;
+    private ArrayList<DX_Device_Report> mDataReport;
+    private ArrayList<DX_Device_Report> mDataReport1;
+    private ArrayList<DX_Device_mReport> mReport;
     private EditText reportPage;
     private TextView reportToatlPage;
     private ListView listView;
     private Context mContext;
     private List<DX_4G_Report.PagingBean> dataPagiReport;
     private DXDeviceReportAdapter DXAdapterReport;
+    private DXDeviceMReportAdapter DXAdapterMReport;
     private SwipeRefreshLayout mSwipe;
     private ProgressBar progressBar;
     private  TextView report_querytext;
     private  String reportQueryTimeShow;
     private  Runnable runnable;
 
-    private int page,page1;
-
-    private int pageCount;
-
-    private int sign;
+    private TextView reportcount;
 
     private  CountDownLatch  countDownLatch;
     private CountDownLatch countDownLatch1;
     private CountDownLatch countDownLatch2;
     private CountDownLatch countDownLatch3;
-    private CountDownLatch countDownLatch4;
-    private CountDownLatch countDownLatch5;
+
+
 
     private int readError;
 
@@ -113,16 +114,20 @@ public class ReportActivity extends BaseActivity {
         reportPage=(EditText)findViewById(R.id.report_edit);
         reportToatlPage=(TextView)findViewById(R.id.reporttotalpageshow);
         listView=(ListView)findViewById(R.id.report_list);
+        reportcount=(TextView)findViewById(R.id.reportcount);
         report_querytext=(TextView)findViewById(R.id.report_querytext);
         ImageView alarm_next_page=(ImageView)findViewById(R.id.report_next_page);
         ImageView alarm_previous_page=(ImageView)findViewById(R.id.report_previous_page);
         myApplication.getInstance().setQuerytime(null);
         report_querytext.setText(getResources().getText(R.string.alarmquery_text));
 
+        mDataReport = new ArrayList<>();
+        mDataReport1=new ArrayList<>();
+        mReport=new ArrayList<>();
 
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)findViewById(R.id.toolbar3);
-        toolbar.setTitle("报表:"+myApplication.getInstance().getDeviceName());
+        toolbar.setTitle("报表:"+myApplication.getInstance().getRegName());
 
         //Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
         // 以下动作让标题居中显地
@@ -137,8 +142,7 @@ public class ReportActivity extends BaseActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(ReportActivity.this,Main2Activity.class);
-                startActivity(intent);
+                finish();
             }
         });
         /****************************************/
@@ -156,6 +160,7 @@ public class ReportActivity extends BaseActivity {
                         ActivityCollector.killAllActivity();
                         break;
                     case R.id.action_test:
+                        Toast.makeText(ReportActivity.this,"测试，无实用功能！",Toast.LENGTH_LONG).show();
                         //Intent intent=new Intent(Main4Activity.this,Main3Activity.class);
                         //startActivity(intent);
                         //overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
@@ -192,20 +197,172 @@ public class ReportActivity extends BaseActivity {
             public void onRefresh() {
                 listView.setAdapter(null);
                 report_querytext.setText(getResources().getText(R.string.alarmquery_text));
-                int devicdID= myApplication.getInstance().getDeviceID();
-                int regID=myApplication.getInstance().getRegID();
+                mDataReport.clear();
+                mDataReport1.clear();
+                mReport.clear();
+
+                final int deviceID=myApplication.getInstance().getDeviceID();
+                final int regID=myApplication.getInstance().getRegID();
                 int valueType=myApplication.getInstance().getValuetype();
-                myApplication.getInstance().setQuerytime(null);
-                readRegValue(devicdID,regID,1,valueType,null);
-                mSwipe.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        /*
-                         * 加载完毕之后就关闭进度条
-                         */
-                        mSwipe.setRefreshing(false);
-                    }
-                }, 5000);
+                //progressBar.setVisibility(View.VISIBLE);
+                //定义线程定时器
+
+                if (valueType==0) {
+                    countDownLatch=new CountDownLatch(1);
+                    readRegValue(deviceID, regID, 1, valueType, null);
+                }else {
+                    countDownLatch=new CountDownLatch(2);
+                    countDownLatch3=new CountDownLatch(2);
+
+                    /**
+                     * 线程1读取第一个地址的页数
+                     */
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            readRegValue1(deviceID, regID, 1, 0, null,1);
+
+                        }
+                    }).start();
+
+                    /**
+                     * 线程2读取第二个地址的页数
+                     */
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(5000);
+                                readRegValue1(deviceID, regID+1, 1, 0, null,2);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }).start();
+
+
+                    /**
+                     * 线程3读取第一个地址的数据
+                     */
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mDataReport.clear();
+                                countDownLatch.await();
+                                for (int i=1;i<=pa[0];i++) {
+                                    countDownLatch1=new CountDownLatch(1);
+                                    readRegValue1(deviceID, regID, i, 0, null, 3);
+                                    countDownLatch1.await();
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            countDownLatch3.countDown();
+
+                        }
+                    }).start();
+
+                    /**
+                     * 线程4读取第二个地址的数据
+                     */
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mDataReport1.clear();
+                                countDownLatch.await();
+                                Thread.sleep(5000);
+                                for (int i=1;i<=pa[1];i++) {
+                                    countDownLatch2=new CountDownLatch(1);
+                                    readRegValue1(deviceID, regID+1, i, 0, null, 4);
+                                    countDownLatch2.await();
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            countDownLatch3.countDown();
+
+                        }
+                    }).start();
+
+
+
+                    /**
+                     * 数据处理
+                     */
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                countDownLatch3.await();
+                                int m=mDataReport.size()-1;
+                                int n=mDataReport1.size()-1;
+                                while ((m>0)&&(n>0)){
+
+                                    while (m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==1)){
+                                        float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(m).getReportValue());
+                                        mReport.add(new DX_Device_mReport(mDataReport.get(m).getReportTime(),convertValue));
+                                        m = m - 1;
+
+                                    }
+
+                                    while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==3)){
+                                        float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m+1).getReportValue());
+                                        mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
+
+                                        n = n - 1;
+
+                                    }
+                                    while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==2)){
+                                        float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m).getReportValue());
+                                        mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
+
+                                        m = m - 1;
+                                        n = n - 1;
+
+
+                                    }
+                                }
+                                if (m==0){
+                                    for (int i=n-1;i>=0;i--){
+                                        float convertValue=intToFloat(mDataReport1.get(i).getReportValue(),mDataReport.get(m).getReportValue());
+                                        mReport.add(new DX_Device_mReport(mDataReport1.get(i).getReportTime(),convertValue));
+                                    }
+                                }
+
+                                if (n==0){
+                                    for (int i=m;i>=0;i--){
+                                        float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(i).getReportValue());
+                                        mReport.add(new DX_Device_mReport(mDataReport.get(i).getReportTime(),convertValue));
+                                    }
+                                }
+
+                                if(m<0|n<0){
+                                    Message msg=Message.obtain();
+                                    msg.what=READ_ERROR;
+                                    handler.sendMessage(msg);
+                                }else {
+
+                                    Message msg = Message.obtain();
+                                    msg.what = READ_FINISH;
+                                    msg.arg1 = mReport.size();
+                                    handler.sendMessage(msg);
+                                }
+
+
+                            } catch (InterruptedException | ParseException e) {
+                                e.printStackTrace();
+                            }
+
+
+                        }
+                    }).start();
+
+
+                }
             }
         });
 
@@ -311,12 +468,13 @@ public class ReportActivity extends BaseActivity {
 
     @Override
     protected void initData() throws httpopenException, InterruptedException {
-        mDataReport = new LinkedList<>();
-        mDataReport1=new LinkedList<>();
+
         final int deviceID=myApplication.getInstance().getDeviceID();
         final int regID=myApplication.getInstance().getRegID();
         int valueType=myApplication.getInstance().getValuetype();
         progressBar.setVisibility(View.VISIBLE);
+
+
         //定义线程定时器
 
         if (valueType==0) {
@@ -345,11 +503,12 @@ public class ReportActivity extends BaseActivity {
                   @Override
                   public void run() {
                       try {
-                          Thread.sleep(300);
+                          Thread.sleep(3000);
+                          readRegValue1(deviceID, regID+1, 1, 0, null,2);
                       } catch (InterruptedException e) {
                           e.printStackTrace();
                       }
-                      readRegValue1(deviceID, regID+1, 1, 0, null,2);
+
                   }
               }).start();
 
@@ -385,10 +544,12 @@ public class ReportActivity extends BaseActivity {
                      try {
                          mDataReport1.clear();
                          countDownLatch.await();
+                         Thread.sleep(3000);
                          for (int i=1;i<=pa[1];i++) {
                              countDownLatch2=new CountDownLatch(1);
                              readRegValue1(deviceID, regID+1, i, 0, null, 4);
                              countDownLatch2.await();
+                             Thread.sleep(5000);
                          }
                      } catch (InterruptedException e) {
                          e.printStackTrace();
@@ -401,19 +562,70 @@ public class ReportActivity extends BaseActivity {
 
 
             /**
-             * 测试
+             * 数据处理
              */
             new Thread(new Runnable() {
                   @Override
                   public void run() {
                       try {
                           countDownLatch3.await();
-                          Message msg=Message.obtain();
-                          msg.what=READ_FINISH;
-                          msg.arg1=mDataReport.size();
-                          msg.arg2=mDataReport1.size();
-                          handler.sendMessage(msg);
-                      } catch (InterruptedException e) {
+                          int m=mDataReport.size()-1;
+                          int n=mDataReport1.size()-1;
+
+                          while ((m>0)&&(n>0)){
+
+                              while (m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==1)){
+                                   float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(m).getReportValue());
+                                   mReport.add(new DX_Device_mReport(mDataReport.get(m).getReportTime(),convertValue));
+                                       m = m - 1;
+
+                              }
+
+                              while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==3)){
+                                  float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m+1).getReportValue());
+                                  mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
+
+                                      n = n - 1;
+
+                              }
+                              while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==2)){
+                                  float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m).getReportValue());
+                                  mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
+
+                                      m = m - 1;
+                                      n = n - 1;
+
+
+                              }
+                          }
+
+                          if (m==0){
+                              for (int i=n-1;i>=0;i--){
+                                  float convertValue=intToFloat(mDataReport1.get(i).getReportValue(),mDataReport.get(m).getReportValue());
+                                  mReport.add(new DX_Device_mReport(mDataReport1.get(i).getReportTime(),convertValue));
+                              }
+                          }
+
+                          if (n==0){
+                              for (int i=m;i>=0;i--){
+                                  float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(i).getReportValue());
+                                  mReport.add(new DX_Device_mReport(mDataReport.get(i).getReportTime(),convertValue));
+                              }
+                          }
+
+                          if(m<0|n<0){
+                              Message msg=Message.obtain();
+                              msg.what=READ_ERROR;
+                              handler.sendMessage(msg);
+                          }else {
+                              Message msg = Message.obtain();
+                              msg.what = READ_FINISH;
+                              msg.arg1 = mReport.size();
+                              handler.sendMessage(msg);
+                         }
+
+
+                      } catch (InterruptedException | ParseException e) {
                           e.printStackTrace();
                       }
 
@@ -450,14 +662,14 @@ public class ReportActivity extends BaseActivity {
                         } catch (JSONException e) {
                             readError=readError+1;
                             e.printStackTrace();
-                            Toast mytoast=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
+                            Toast mytoast=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_SHORT);
                             mytoast.setGravity(Gravity.CENTER,0,190);
                             mytoast.show();
                         }
 
                     }else{
                         readError=readError+1;
-                        Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                         mytoast.setGravity(Gravity.CENTER,0,190);
                         mytoast.show();
                     }
@@ -471,7 +683,7 @@ public class ReportActivity extends BaseActivity {
                     readError=readError+1;
                     RemoveWatchDog(handler,runnable);
                     progressBar.setVisibility(View.GONE);
-                    Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                    Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                     mytoast.setGravity(Gravity.CENTER,0,190);
                     mytoast.show();
                     break;
@@ -479,101 +691,146 @@ public class ReportActivity extends BaseActivity {
                 case WATCHDOG_FINISH:
                     mSwipe.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
-                    Toast mytoast1=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                    Toast mytoast1=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                     mytoast1.setGravity(Gravity.CENTER,0,190);
                     mytoast1.show();
                     RemoveWatchDog(handler,runnable);
                     break;
                 case READ_FINISH:
-                    Toast.makeText(ReportActivity.this,msg.arg1+" "+msg.arg2,Toast.LENGTH_LONG).show();
+                    int value=msg.arg1/100;
+                    int remainder=msg.arg1 % 100;
+                    if (remainder>0){
+                        value=value+1;
+                    }
+                    reportcount.setText(String.valueOf(msg.arg1));
+                    reportToatlPage.setText(String.valueOf(value));
+                    reportPage.setText(String.valueOf(1));
+                    DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport, mContext);
+                    listView.setAdapter(DXAdapterMReport);
                     progressBar.setVisibility(View.GONE);
+                    mSwipe.setRefreshing(false);
                     break;
 
-                case 11:
+                case READ_ADDR1_PAGE_FINISH:
                     if (msg.arg1==200) {
-                        String response = (String) msg.obj;
-                        try {
-                            pa[0] = isPageNumber(response);
+                        final String response = (String) msg.obj;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    pa[0] = isPageNumber(response);
+                                   countDownLatch.countDown();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    countDownLatch.countDown();
+                                }
+                            }
+                        }).start();
 
-                        } catch (JSONException e) {
-                            readError=readError+1;
-                            e.printStackTrace();
-                            Toast mytoast4=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
-                            mytoast4.setGravity(Gravity.CENTER,0,190);
-                            mytoast4.show();
-                        }
+
                     }
                     else{
                         readError=readError+1;
-                        Toast mytoast2=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        Toast mytoast2=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                         mytoast2.setGravity(Gravity.CENTER,0,190);
                         mytoast2.show();
+                        countDownLatch.countDown();
                     }
-                    countDownLatch.countDown();
+
                     break;
-                case 12:
+                case READ_ADDR2_PAGE_FINISH:
                     if (msg.arg1==200) {
-                        String response = (String) msg.obj;
-                        try {
-                            pa[1] = isPageNumber(response);
-                        } catch (JSONException e) {
-                            readError=readError+1;
-                            e.printStackTrace();
-                            Toast mytoast5=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
-                            mytoast5.setGravity(Gravity.CENTER,0,190);
-                            mytoast5.show();
-                        }
+                        final String response = (String) msg.obj;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    pa[1] = isPageNumber(response);
+                                   countDownLatch.countDown();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    countDownLatch.countDown();
+                                }
+                            }
+                        }).start();
+
                     }
                     else{
                         readError=readError+1;
-                        Toast mytoast3=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        Toast mytoast3=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                         mytoast3.setGravity(Gravity.CENTER,0,190);
                         mytoast3.show();
+                        countDownLatch.countDown();
                     }
-                    countDownLatch.countDown();
+
                     break;
-                case 13:
+                case READ_ADDR1_DATA_FINISH:
                     if (msg.arg1==200) {
-                        String response = (String) msg.obj;
-                        try {
-                            parseJSONWITHGSON1(response);
-                        } catch (JSONException e) {
-                            readError=readError+1;
-                            e.printStackTrace();
-                            Toast mytoast6=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
-                            mytoast6.setGravity(Gravity.CENTER,0,190);
-                            mytoast6.show();
-                        }
+                        final String response = (String) msg.obj;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    parseJSONWITHGSON1(response);
+                                    countDownLatch1.countDown();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    countDownLatch1.countDown();
+                                }
+                            }
+                        }).start();
+
                     }
                     else{
                         readError=readError+1;
-                        Toast mytoast7=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        Toast mytoast7=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                         mytoast7.setGravity(Gravity.CENTER,0,190);
                         mytoast7.show();
+                        countDownLatch1.countDown();
                     }
-                    countDownLatch1.countDown();
+
                     break;
-                case 14:
+                case READ_ADDR2_DATA_FINISH:
                     if (msg.arg1==200) {
-                        String response = (String) msg.obj;
-                        try {
-                            parseJSONWITHGSON2(response);
-                        } catch (JSONException e) {
-                            readError=readError+1;
-                            e.printStackTrace();
-                            Toast mytoast8=Toast.makeText(ReportActivity.this,"Code:0"+e.toString(),Toast.LENGTH_LONG);
-                            mytoast8.setGravity(Gravity.CENTER,0,190);
-                            mytoast8.show();
-                        }
+                        final String response = (String) msg.obj;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    parseJSONWITHGSON2(response);
+                                    countDownLatch2.countDown();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    countDownLatch2.countDown();
+                                }
+                            }
+                        }).start();
+
                     }
                     else{
                         readError=readError+1;
-                        Toast mytoast9=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_LONG);
+                        Toast mytoast9=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                         mytoast9.setGravity(Gravity.CENTER,0,190);
                         mytoast9.show();
+                        countDownLatch2.countDown();
                     }
-                    countDownLatch2.countDown();
+
                     break;
+                case READ_ERROR:
+                    Toast mytoast9=Toast.makeText(ReportActivity.this,"出错啦!!！",Toast.LENGTH_LONG);
+                    mytoast9.setGravity(Gravity.CENTER,0,190);
+                    mytoast9.show();
+                    finish();
+                        break;
+                default:
+                    if(readError>0){
+                        progressBar.setVisibility(View.GONE);
+                        Toast mytoast19=Toast.makeText(ReportActivity.this,"出错啦！",Toast.LENGTH_LONG);
+                        mytoast19.setGravity(Gravity.CENTER,0,190);
+                        mytoast19.show();
+                        finish();
+
+                    }
 
 
 
@@ -749,7 +1006,7 @@ public class ReportActivity extends BaseActivity {
             reportPage.setHint(jsonArray1.getString("page"));
         }
        listView.setAdapter(null);
-       DXAdapterReport = new DXDeviceReportAdapter((LinkedList<DX_Device_Report>) mDataReport, mContext);
+       DXAdapterReport = new DXDeviceReportAdapter((ArrayList<DX_Device_Report>) mDataReport, mContext);
         listView.setAdapter(DXAdapterReport);
 
 
@@ -760,7 +1017,6 @@ public class ReportActivity extends BaseActivity {
     private void parseJSONWITHGSON1(String jsonData) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonData);//将读回的字符串转换成JSON对象
         JSONArray jsonArray = jsonObject.getJSONArray("data");//获取名称data的JSON数组
-        JSONObject jsonArray1=jsonObject.getJSONObject("paging");
         Gson gson = new Gson();
         dataBeansReport = gson.fromJson(jsonArray.toString(), new TypeToken<List<List<String>>>() {
         }.getType());
@@ -794,14 +1050,14 @@ public class ReportActivity extends BaseActivity {
     private  void RegValueHandle(List<List<String>> RegValue){
 
         for(int i=0;i<RegValue.size();i++){
-            mDataReport.add(new DX_Device_Report(RegValue.get(i).get(0),Integer.parseInt(RegValue.get(i).get(3))));
+            mDataReport.add(new DX_Device_Report(TimeExtract(RegValue.get(i).get(0)),Integer.parseInt(RegValue.get(i).get(3))));
         }
     }
 
     private  void RegValueHandle1(List<List<String>> RegValue){
 
         for(int i=0;i<RegValue.size();i++){
-            mDataReport1.add(new DX_Device_Report(RegValue.get(i).get(0),Integer.parseInt(RegValue.get(i).get(3))));
+            mDataReport1.add(new DX_Device_Report(TimeExtract(RegValue.get(i).get(0)),Integer.parseInt(RegValue.get(i).get(3))));
         }
     }
 
@@ -847,5 +1103,41 @@ public class ReportActivity extends BaseActivity {
         handler.removeCallbacksAndMessages(runnable);
     }
 
+    private static float intToFloat(int HValue,int LValue){
+        String Hhex= Integer.toHexString(HValue);
+        String Lhex=Integer.toHexString(LValue);
+        for(int i=Lhex.length();i<4;i++){
+            Lhex="0"+Lhex;
+        }
+        String hex=Hhex+Lhex;
+        return Float.intBitsToFloat(new BigInteger(hex, 16).intValue());
+    }
+
+    /**
+     * 时间比较
+     */
+    private  int TimeCompare(String startTime,String endTime) throws ParseException {
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date st=simpleDateFormat.parse(startTime);
+        Date et=simpleDateFormat.parse(endTime);
+        int rv=0;
+        if (st.getTime()<et.getTime()){
+            rv= 1;
+        }
+        if(st.getTime()==et.getTime()){
+            rv= 2;
+        }
+        if(st.getTime()>et.getTime()){
+            rv= 3;
+        }
+        return rv;
+    }
+
+    private  String TimeExtract(String containTimeString){
+             String str1=containTimeString.substring(0,10);
+             String str2=containTimeString.substring(11,19);
+             return str1+" "+str2;
+
+    }
 
 }

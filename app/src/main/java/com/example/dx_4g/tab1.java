@@ -93,12 +93,14 @@ public class tab1 extends Fragment {
                     intent.putExtra("regaddrtype",regsign);
                     intent.putExtra("regname",mDataReg.get(position).getRegName());
                     intent.putExtra("regvalue",mDataReg.get(position).getRegValue());
+                    myApplication.getInstance().setRegName(mDataReg.get(position).getRegName());
                 }else{
                     getRegValue_type(position, queryData);
                     intent.putExtra("regaddr",regPosition);
                     intent.putExtra("regaddrtype",regsign);
                     intent.putExtra("regname",queryData.get(position).getRegName());
                     intent.putExtra("regvalue",queryData.get(position).getRegValue());
+                    myApplication.getInstance().setRegName(queryData.get(position).getRegName());
                 }
                 startActivity(intent);
                 //getActivity().onBackPressed();//关闭fragment tab1

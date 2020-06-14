@@ -5,20 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.dx_4g.R;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
-public class DXDeviceReportAdapter extends BaseAdapter {
+public class DXDeviceMReportAdapter extends BaseAdapter {
 
     private Context mContext;
     private ArrayList linkDXDeviceReport;
 
-    public DXDeviceReportAdapter(ArrayList<DX_Device_Report> linkDXDeviceReport, Context mContext) {
+    public DXDeviceMReportAdapter(ArrayList<DX_Device_mReport> linkDXDeviceReport, Context mContext) {
         this.linkDXDeviceReport = linkDXDeviceReport;
         this.mContext = mContext;
     }
@@ -43,7 +41,7 @@ public class DXDeviceReportAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolderReport viewHolder=null;
-        DX_Device_Report dx_device_report= (DX_Device_Report) linkDXDeviceReport.get(position);
+        DX_Device_mReport dx_device_report= (DX_Device_mReport) linkDXDeviceReport.get(position);
         if (viewHolder==null){
             convertView= LayoutInflater.from(mContext).inflate(R.layout.dx_report,parent,false);
             viewHolder=new ViewHolderReport();

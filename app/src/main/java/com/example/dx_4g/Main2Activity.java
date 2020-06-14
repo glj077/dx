@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -42,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -310,6 +312,12 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
          }
      });
 
+
+
+
+
+
+
     }
     //***********************************//
 
@@ -458,6 +466,17 @@ public class Main2Activity extends BaseActivity implements View.OnClickListener 
 
     private void RemoveWatchDog(Handler handler,Runnable runnable){
         handler.removeCallbacksAndMessages(runnable);
+    }
+
+
+    private static float intToFloat(int HValue,int LValue){
+        String Hhex= Integer.toHexString(HValue);
+        String Lhex=Integer.toHexString(LValue);
+        for(int i=Lhex.length();i<4;i++){
+            Lhex="0"+Lhex;
+        }
+        String hex=Hhex+Lhex;
+        return Float.intBitsToFloat(new BigInteger(hex, 16).intValue());
     }
 
 }

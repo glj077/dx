@@ -137,7 +137,7 @@ public class Regedit extends BaseActivity implements View.OnClickListener {
         //标题栏设置
         setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3));
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);//隐藏默认的Title
-        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setTitle("设备");
+        ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setTitle("设备:"+myApplication.getInstance().getDeviceName());
         ((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar3)).setNavigationIcon(R.drawable.rego);//设置导航图标
 
         // 以下动作让标题居中显地

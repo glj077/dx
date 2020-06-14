@@ -40,8 +40,8 @@ public class HttpUtil {
                     connection.addRequestProperty("Accept", "application/json");
                     connection.addRequestProperty("Content-Type", "application/json");
                     connection.addRequestProperty("Authorization", pasBase64);
-                    connection.setReadTimeout(8000);
-                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(30000);
+                    connection.setConnectTimeout(30000);
                     connection.setUseCaches(false);
                     //connection.setDoInput(true);
                     //connection.setDoOutput(true);
