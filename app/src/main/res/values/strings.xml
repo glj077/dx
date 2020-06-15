@@ -25,6 +25,8 @@
     <string name="user_format">用户名格式错误，请输入Email！</string>
     <string name="report_count">数据总数:</string>
     <string name="report_time">时间</string>
+    <string name="alarm_total">报警总数</string>
+    <string name="report_value">值</string>
     <string-array name="calendar_string">
         <item>一</item>
         <item>二</item>

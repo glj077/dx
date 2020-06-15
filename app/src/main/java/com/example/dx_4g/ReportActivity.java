@@ -1,7 +1,6 @@
 package com.example.dx_4g;
 
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
@@ -200,6 +199,9 @@ public class ReportActivity extends BaseActivity {
                 mDataReport.clear();
                 mDataReport1.clear();
                 mReport.clear();
+                reportcount.setText(null);
+                reportPage.setText(null);
+                reportToatlPage.setText(null);
 
                 final int deviceID=myApplication.getInstance().getDeviceID();
                 final int regID=myApplication.getInstance().getRegID();
@@ -233,7 +235,7 @@ public class ReportActivity extends BaseActivity {
                         @Override
                         public void run() {
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(1000);
                                 readRegValue1(deviceID, regID+1, 1, 0, null,2);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -274,7 +276,7 @@ public class ReportActivity extends BaseActivity {
                             try {
                                 mDataReport1.clear();
                                 countDownLatch.await();
-                                Thread.sleep(5000);
+                                Thread.sleep(1000);
                                 for (int i=1;i<=pa[1];i++) {
                                     countDownLatch2=new CountDownLatch(1);
                                     readRegValue1(deviceID, regID+1, i, 0, null, 4);
@@ -469,172 +471,7 @@ public class ReportActivity extends BaseActivity {
     @Override
     protected void initData() throws httpopenException, InterruptedException {
 
-        final int deviceID=myApplication.getInstance().getDeviceID();
-        final int regID=myApplication.getInstance().getRegID();
-        int valueType=myApplication.getInstance().getValuetype();
-        progressBar.setVisibility(View.VISIBLE);
 
-
-        //定义线程定时器
-
-        if (valueType==0) {
-            countDownLatch=new CountDownLatch(1);
-            readRegValue(deviceID, regID, 1, valueType, null);
-        }else {
-            countDownLatch=new CountDownLatch(2);
-            countDownLatch3=new CountDownLatch(2);
-
-            /**
-             * 线程1读取第一个地址的页数
-             */
-            new Thread(new Runnable() {
-                  @Override
-                  public void run() {
-                      readRegValue1(deviceID, regID, 1, 0, null,1);
-
-                  }
-              }).start();
-
-            /**
-             * 线程2读取第二个地址的页数
-             */
-
-            new Thread(new Runnable() {
-                  @Override
-                  public void run() {
-                      try {
-                          Thread.sleep(3000);
-                          readRegValue1(deviceID, regID+1, 1, 0, null,2);
-                      } catch (InterruptedException e) {
-                          e.printStackTrace();
-                      }
-
-                  }
-              }).start();
-
-
-            /**
-             * 线程3读取第一个地址的数据
-             */
-             new Thread(new Runnable() {
-                 @Override
-                 public void run() {
-                     try {
-                         mDataReport.clear();
-                         countDownLatch.await();
-                         for (int i=1;i<=pa[0];i++) {
-                             countDownLatch1=new CountDownLatch(1);
-                             readRegValue1(deviceID, regID, i, 0, null, 3);
-                             countDownLatch1.await();
-                         }
-                     } catch (InterruptedException e) {
-                         e.printStackTrace();
-                     }
-                    countDownLatch3.countDown();
-
-                 }
-             }).start();
-
-            /**
-             * 线程4读取第二个地址的数据
-             */
-             new Thread(new Runnable() {
-                 @Override
-                 public void run() {
-                     try {
-                         mDataReport1.clear();
-                         countDownLatch.await();
-                         Thread.sleep(3000);
-                         for (int i=1;i<=pa[1];i++) {
-                             countDownLatch2=new CountDownLatch(1);
-                             readRegValue1(deviceID, regID+1, i, 0, null, 4);
-                             countDownLatch2.await();
-                             Thread.sleep(5000);
-                         }
-                     } catch (InterruptedException e) {
-                         e.printStackTrace();
-                     }
-                     countDownLatch3.countDown();
-
-                 }
-             }).start();
-
-
-
-            /**
-             * 数据处理
-             */
-            new Thread(new Runnable() {
-                  @Override
-                  public void run() {
-                      try {
-                          countDownLatch3.await();
-                          int m=mDataReport.size()-1;
-                          int n=mDataReport1.size()-1;
-
-                          while ((m>0)&&(n>0)){
-
-                              while (m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==1)){
-                                   float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(m).getReportValue());
-                                   mReport.add(new DX_Device_mReport(mDataReport.get(m).getReportTime(),convertValue));
-                                       m = m - 1;
-
-                              }
-
-                              while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==3)){
-                                  float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m+1).getReportValue());
-                                  mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
-
-                                      n = n - 1;
-
-                              }
-                              while ( m!=0 && n!=0 && ((TimeCompare(mDataReport.get(m).getReportTime(),mDataReport1.get(n-1).getReportTime()))==2)){
-                                  float convertValue=intToFloat(mDataReport1.get(n-1).getReportValue(),mDataReport.get(m).getReportValue());
-                                  mReport.add(new DX_Device_mReport(mDataReport1.get(n-1).getReportTime(),convertValue));
-
-                                      m = m - 1;
-                                      n = n - 1;
-
-
-                              }
-                          }
-
-                          if (m==0){
-                              for (int i=n-1;i>=0;i--){
-                                  float convertValue=intToFloat(mDataReport1.get(i).getReportValue(),mDataReport.get(m).getReportValue());
-                                  mReport.add(new DX_Device_mReport(mDataReport1.get(i).getReportTime(),convertValue));
-                              }
-                          }
-
-                          if (n==0){
-                              for (int i=m;i>=0;i--){
-                                  float convertValue=intToFloat(mDataReport1.get(n).getReportValue(),mDataReport.get(i).getReportValue());
-                                  mReport.add(new DX_Device_mReport(mDataReport.get(i).getReportTime(),convertValue));
-                              }
-                          }
-
-                          if(m<0|n<0){
-                              Message msg=Message.obtain();
-                              msg.what=READ_ERROR;
-                              handler.sendMessage(msg);
-                          }else {
-                              Message msg = Message.obtain();
-                              msg.what = READ_FINISH;
-                              msg.arg1 = mReport.size();
-                              handler.sendMessage(msg);
-                         }
-
-
-                      } catch (InterruptedException | ParseException e) {
-                          e.printStackTrace();
-                      }
-
-
-                  }
-              }).start();
-
-
-        }
         }
 
 
@@ -685,7 +522,7 @@ public class ReportActivity extends BaseActivity {
                     progressBar.setVisibility(View.GONE);
                     Toast mytoast=Toast.makeText(ReportActivity.this,"Code:"+msg.arg1+" Message:"+(String) msg.obj,Toast.LENGTH_SHORT);
                     mytoast.setGravity(Gravity.CENTER,0,190);
-                    mytoast.show();
+                    //mytoast.show();
                     break;
 
                 case WATCHDOG_FINISH:
@@ -867,22 +704,6 @@ public class ReportActivity extends BaseActivity {
 
         }
 
-
-//        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
-//            @Override
-//            public void onWatchDogFinish(long code, String message) {
-//                Message msg = Message.obtain();
-//                msg.what = WATCHDOG_FINISH;
-//                msg.arg1 =(int)(code);
-//                msg.obj=message;
-//                handler.sendMessage(msg);
-//            }
-//
-//        });
-
-
-
-
         HttpUtil.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListener() {
             @Override
             public void onFinish(String response,int httpcode) {
@@ -901,7 +722,6 @@ public class ReportActivity extends BaseActivity {
                 msg.what = SEND_REQUEST_ERR;
                 msg.obj = httpmessage;
                 msg.arg1=httpcode;
-
                 handler.sendMessage(msg);
             }
         });
@@ -933,21 +753,6 @@ public class ReportActivity extends BaseActivity {
             }
 
         }
-
-
-//        watchdog(handler,runnable,15000, new watchdogCallbackListener() {
-//            @Override
-//            public void onWatchDogFinish(long code, String message) {
-//                Message msg = Message.obtain();
-//                msg.what = WATCHDOG_FINISH;
-//                msg.arg1 =(int)(code);
-//                msg.obj=message;
-//                handler.sendMessage(msg);
-//            }
-//
-//        });
-
-
 
 
         HttpUtilReponseCode.sendHttpRequest(webAddr, myApplication.getInstance().getPasbas64(), new HttpCallbackListenerReponsCode() {
@@ -996,6 +801,7 @@ public class ReportActivity extends BaseActivity {
         reportPage.setText(null);
         reportPage.setHint(jsonArray1.getString("page"));
         reportToatlPage.setText(jsonArray1.getString("pageCount"));
+        reportcount.setText(String.valueOf(jsonArray1.getString("total")));
         if (Integer.parseInt((String) reportToatlPage.getText())==0){
             reportPage.setHint("0");
             Toast mytoast=Toast.makeText(ReportActivity.this,"在查询日期范围无数据！",Toast.LENGTH_LONG);
@@ -1137,6 +943,176 @@ public class ReportActivity extends BaseActivity {
              String str1=containTimeString.substring(0,10);
              String str2=containTimeString.substring(11,19);
              return str1+" "+str2;
+
+    }
+
+    protected void onStart() {
+        super.onStart();
+        final int deviceID = myApplication.getInstance().getDeviceID();
+        final int regID = myApplication.getInstance().getRegID();
+        int valueType = myApplication.getInstance().getValuetype();
+        progressBar.setVisibility(View.VISIBLE);
+
+
+        //定义线程定时器
+
+        if (valueType == 0) {
+            countDownLatch = new CountDownLatch(1);
+            readRegValue(deviceID, regID, 1, valueType, null);
+        } else {
+            countDownLatch = new CountDownLatch(2);
+            countDownLatch3 = new CountDownLatch(2);
+
+            /**
+             * 线程1读取第一个地址的页数
+             */
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    readRegValue1(deviceID, regID, 1, 0, null, 1);
+
+                }
+            }).start();
+
+            /**
+             * 线程2读取第二个地址的页数
+             */
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        readRegValue1(deviceID, regID + 1, 1, 0, null, 2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).start();
+
+
+            /**
+             * 线程3读取第一个地址的数据
+             */
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mDataReport.clear();
+                        countDownLatch.await();
+                        for (int i = 1; i <= pa[0]; i++) {
+                            countDownLatch1 = new CountDownLatch(1);
+                            readRegValue1(deviceID, regID, i, 0, null, 3);
+                            countDownLatch1.await();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    countDownLatch3.countDown();
+
+                }
+            }).start();
+
+            /**
+             * 线程4读取第二个地址的数据
+             */
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mDataReport1.clear();
+                        countDownLatch.await();
+                        Thread.sleep(1000);
+                        for (int i = 1; i <= pa[1]; i++) {
+                            countDownLatch2 = new CountDownLatch(1);
+                            readRegValue1(deviceID, regID + 1, i, 0, null, 4);
+                            countDownLatch2.await();
+                            Thread.sleep(1000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    countDownLatch3.countDown();
+
+                }
+            }).start();
+
+
+            /**
+             * 数据处理
+             */
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        countDownLatch3.await();
+                        int m = mDataReport.size() - 1;
+                        int n = mDataReport1.size() - 1;
+
+                        while ((m > 0) && (n > 0)) {
+
+                            while (m != 0 && n != 0 && ((TimeCompare(mDataReport.get(m).getReportTime(), mDataReport1.get(n - 1).getReportTime())) == 1)) {
+                                float convertValue = intToFloat(mDataReport1.get(n).getReportValue(), mDataReport.get(m).getReportValue());
+                                mReport.add(new DX_Device_mReport(mDataReport.get(m).getReportTime(), convertValue));
+                                m = m - 1;
+
+                            }
+
+                            while (m != 0 && n != 0 && ((TimeCompare(mDataReport.get(m).getReportTime(), mDataReport1.get(n - 1).getReportTime())) == 3)) {
+                                float convertValue = intToFloat(mDataReport1.get(n - 1).getReportValue(), mDataReport.get(m + 1).getReportValue());
+                                mReport.add(new DX_Device_mReport(mDataReport1.get(n - 1).getReportTime(), convertValue));
+
+                                n = n - 1;
+
+                            }
+                            while (m != 0 && n != 0 && ((TimeCompare(mDataReport.get(m).getReportTime(), mDataReport1.get(n - 1).getReportTime())) == 2)) {
+                                float convertValue = intToFloat(mDataReport1.get(n - 1).getReportValue(), mDataReport.get(m).getReportValue());
+                                mReport.add(new DX_Device_mReport(mDataReport1.get(n - 1).getReportTime(), convertValue));
+
+                                m = m - 1;
+                                n = n - 1;
+
+
+                            }
+                        }
+
+                        if (m == 0) {
+                            for (int i = n - 1; i >= 0; i--) {
+                                float convertValue = intToFloat(mDataReport1.get(i).getReportValue(), mDataReport.get(m).getReportValue());
+                                mReport.add(new DX_Device_mReport(mDataReport1.get(i).getReportTime(), convertValue));
+                            }
+                        }
+
+                        if (n == 0) {
+                            for (int i = m; i >= 0; i--) {
+                                float convertValue = intToFloat(mDataReport1.get(n).getReportValue(), mDataReport.get(i).getReportValue());
+                                mReport.add(new DX_Device_mReport(mDataReport.get(i).getReportTime(), convertValue));
+                            }
+                        }
+
+                        if (m < 0 | n < 0) {
+                            Message msg = Message.obtain();
+                            msg.what = READ_ERROR;
+                            handler.sendMessage(msg);
+                        } else {
+                            Message msg = Message.obtain();
+                            msg.what = READ_FINISH;
+                            msg.arg1 = mReport.size();
+                            handler.sendMessage(msg);
+                        }
+
+
+                    } catch (InterruptedException | ParseException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }).start();
+
+
+        }
 
     }
 

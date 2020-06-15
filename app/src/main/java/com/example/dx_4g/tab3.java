@@ -68,6 +68,7 @@ public class tab3 extends Fragment {
     private  TextView alarm_querytext;
     private  String alarmQueryTimeShow;
     private  Runnable runnable;
+    private TextView alarmTotal;
 
     /****************************************/
     //消息处理
@@ -135,6 +136,7 @@ public class tab3 extends Fragment {
         alarm_querytext=(TextView) view.findViewById(R.id.alarm_querytext);
         ImageView alarm_next_page=(ImageView)view.findViewById(R.id.alarm_next_page);
         ImageView alarm_previous_page=(ImageView)view.findViewById(R.id.alarm_previous_page);
+         alarmTotal=(TextView)view.findViewById(R.id.alarmtotalshow);
 
         myApplication.getInstance().setQuerytime(null);
         alarm_querytext.setText(getResources().getText(R.string.alarmquery_text));
@@ -389,6 +391,7 @@ public class tab3 extends Fragment {
         alarmPage.setText(null);
         alarmPage.setHint(jsonArray1.getString("page"));
         alarmToatlPage.setText(jsonArray1.getString("pageCount"));
+        alarmTotal.setText(jsonArray1.getString("total"));
         if (Integer.parseInt((String) alarmToatlPage.getText())==0){
             alarmPage.setHint("0");
             Toast mytoast=Toast.makeText(getContext(),"在查询日期范围无数据！",Toast.LENGTH_LONG);
