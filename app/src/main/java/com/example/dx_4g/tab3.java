@@ -11,10 +11,12 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -247,21 +249,7 @@ public class tab3 extends Fragment {
 
          @Override
          public void afterTextChanged(Editable s) {
-             if (isInteger((String)s.toString())){
-             int alarepage=Integer.parseInt((String)s.toString());
-             int deviceID= myApplication.getInstance().getDeviceID();
 
-             progressBar=getActivity().findViewById(R.id.progressBar3);
-             progressBar.setVisibility(View.VISIBLE);
-             readRegValue(deviceID,alarepage,myApplication.getInstance().getQuerytime());
-             alarm_page.clearFocus();
-                 //输入法处理
-                 InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
-                 boolean isOpen = imm.isActive();
-                 if (isOpen) {
-                     imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                 }
-             }
 
          }
      });
@@ -274,9 +262,23 @@ public class tab3 extends Fragment {
      alarm_next_page.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
-             if (isInteger((String)alarm_page.getHint())){
-                 int alarepage=Integer.parseInt((String)alarm_page.getHint())+1;
-                alarm_page.setText(String.valueOf(alarepage));
+             if (isInteger(alarm_page.getText().toString())){
+                 int alarepage=Integer.parseInt(alarm_page.getText().toString())+1;
+                 int alareTotalPage=Integer.parseInt(alarmToatlPage.getText().toString());
+                 int deviceID=myApplication.getInstance().getDeviceID();
+                 if (alarepage<=alareTotalPage) {
+                     alarm_page.setText(String.valueOf(alarepage));
+                     progressBar.setVisibility(View.VISIBLE);
+                     readRegValue(deviceID,alarepage,null);
+
+                 }
+                 else{
+                     Toast mytoast=Toast.makeText(getContext(),"已到最后一页",Toast.LENGTH_LONG);
+                     mytoast.setGravity(Gravity.CENTER,0,190);
+                     mytoast.show();
+                     alarm_page.setHint(String.valueOf(alareTotalPage));
+                 }
+
              }
 
          }
@@ -291,10 +293,13 @@ public class tab3 extends Fragment {
         alarm_previous_page.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInteger((String)alarm_page.getHint())){
-                    int alarepage=Integer.parseInt((String)alarm_page.getHint())-1;
+                if (isInteger(alarm_page.getText().toString())){
+                    int alarepage=Integer.parseInt(alarm_page.getText().toString())-1;
+                    int deviceID=myApplication.getInstance().getDeviceID();
                     if (alarepage>=1) {
                         alarm_page.setText(String.valueOf(alarepage));
+                        progressBar.setVisibility(View.VISIBLE);
+                        readRegValue(deviceID,alarepage,null);
                     }
                     else{
                         Toast mytoast=Toast.makeText(getContext(),"已到第一页",Toast.LENGTH_LONG);
@@ -324,6 +329,57 @@ public class tab3 extends Fragment {
      });
 
      /****************************************/
+
+
+     alarmPage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+         @Override
+         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId==EditorInfo.IME_ACTION_DONE) {
+                if ((isInteger( v.getText().toString())) && (Integer.parseInt(v.getText().toString())>0) &&(Integer.parseInt(v.getText().toString())<=Integer.parseInt(alarmToatlPage.getText().toString()))) {
+                    int alarepage = Integer.parseInt(v.getText().toString());
+                    int deviceID = myApplication.getInstance().getDeviceID();
+
+                    progressBar = getActivity().findViewById(R.id.progressBar3);
+                    progressBar.setVisibility(View.VISIBLE);
+                    readRegValue(deviceID, alarepage, myApplication.getInstance().getQuerytime());
+                    alarm_page.clearFocus();
+                    //输入法处理
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    boolean isOpen = imm.isActive();
+                    if (isOpen) {
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
+                }else{
+                    Toast mytoast=Toast.makeText(getContext(),"输入值错误",Toast.LENGTH_LONG);
+                    mytoast.setGravity(Gravity.CENTER,0,190);
+                    mytoast.show();
+                }
+            }
+
+
+             return false;
+         }
+     });
+
+
+
+
+
+        /**
+         * EditText焦点监听事件
+         */
+        alarmPage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    alarmPage.setText(null);
+                    alarmPage.setHint(null);
+                }
+            }
+        });
+
+
+
 
         return view;
     }
@@ -389,11 +445,11 @@ public class tab3 extends Fragment {
         RegValueHandle(dataBeansAlarm);
         mContext = this.getContext();
         alarmPage.setText(null);
-        alarmPage.setHint(jsonArray1.getString("page"));
+        alarmPage.setText(jsonArray1.getString("page"));
         alarmToatlPage.setText(jsonArray1.getString("pageCount"));
         alarmTotal.setText(jsonArray1.getString("total"));
         if (Integer.parseInt((String) alarmToatlPage.getText())==0){
-            alarmPage.setHint("0");
+            alarmPage.setText("0");
             Toast mytoast=Toast.makeText(getContext(),"在查询日期范围无数据！",Toast.LENGTH_LONG);
             mytoast.setGravity(Gravity.CENTER,0,190);
             mytoast.show();

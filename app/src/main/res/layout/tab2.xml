@@ -28,7 +28,9 @@
             android:layout_gravity="center"
             android:id="@+id/report_previous_page"
             android:src="@drawable/alarm_previous_page"
-            android:contentDescription="TODO" />
+            android:clickable="true"
+            android:contentDescription="TODO"
+            android:focusable="true" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -48,6 +50,8 @@
             android:textSize="15sp"
             android:gravity="center"
             android:inputType="number"
+            android:imeOptions="actionDone"
+            android:singleLine="true"
             android:textColor="@color/colorwhite"
             android:textColorHint="@color/colorwhite"
             android:layout_margin="5dp"
@@ -98,9 +102,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
+            android:clickable="true"
             android:id="@+id/report_next_page"
             android:src="@drawable/alarm_next_page"
-            android:contentDescription="TODO" />
+            android:contentDescription="TODO"
+            android:focusable="true" />
 
     </LinearLayout>
     <TextView

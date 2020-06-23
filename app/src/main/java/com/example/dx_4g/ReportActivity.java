@@ -6,15 +6,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -55,7 +58,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
-public class ReportActivity extends BaseActivity {
+public class ReportActivity extends BaseActivity implements View.OnClickListener {
 
 
     private static final int SEND_REQUEST=1;
@@ -72,12 +75,13 @@ public class ReportActivity extends BaseActivity {
     private List<List<String>> dataBeansReport2;
     private ArrayList<DX_Device_Report> mDataReport;
     private ArrayList<DX_Device_Report> mDataReport1;
+    private ArrayList<DX_Device_Report> mfDataReport;
     private ArrayList<DX_Device_mReport> mReport;
+    private ArrayList<DX_Device_mReport> mReport_list;
     private EditText reportPage;
     private TextView reportToatlPage;
     private ListView listView;
     private Context mContext;
-    private List<DX_4G_Report.PagingBean> dataPagiReport;
     private DXDeviceReportAdapter DXAdapterReport;
     private DXDeviceMReportAdapter DXAdapterMReport;
     private SwipeRefreshLayout mSwipe;
@@ -93,11 +97,9 @@ public class ReportActivity extends BaseActivity {
     private CountDownLatch countDownLatch2;
     private CountDownLatch countDownLatch3;
 
-
-
+    private int reportQuertPage;
+    private String queryTime=null;
     private int readError;
-
-
     private int[] pa=new int[3];
 
     @Override
@@ -108,6 +110,8 @@ public class ReportActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        queryTime=null;
+        reportQuertPage=0;
         mContext =this;
         progressBar=(ProgressBar)findViewById(R.id.progressBar4);
         reportPage=(EditText)findViewById(R.id.report_edit);
@@ -123,6 +127,8 @@ public class ReportActivity extends BaseActivity {
         mDataReport = new ArrayList<>();
         mDataReport1=new ArrayList<>();
         mReport=new ArrayList<>();
+        mReport_list=new ArrayList<>();
+        mfDataReport=new ArrayList<>();
 
 
         androidx.appcompat.widget.Toolbar toolbar =(Toolbar)findViewById(R.id.toolbar3);
@@ -183,7 +189,7 @@ public class ReportActivity extends BaseActivity {
         /***************************************/
         //下拉刷新
         mSwipe=(SwipeRefreshLayout)findViewById(R.id.swipelayout2);
-        /*
+        /**
          * 设置进度条的颜色
          * 参数是一个可变参数、可以填多个颜色
          */
@@ -202,6 +208,7 @@ public class ReportActivity extends BaseActivity {
                 reportcount.setText(null);
                 reportPage.setText(null);
                 reportToatlPage.setText(null);
+                myApplication.getInstance().setQuerytime(null);
 
                 final int deviceID=myApplication.getInstance().getDeviceID();
                 final int regID=myApplication.getInstance().getRegID();
@@ -372,6 +379,54 @@ public class ReportActivity extends BaseActivity {
         /******************************************/
         //Edit页注册改变响应事件
         @SuppressLint("CutPasteId") final EditText report_page=(EditText)findViewById(R.id.report_edit);
+        report_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                report_page.setText(null);
+                //report_page.setFocusable(true);
+
+            }
+        });
+        report_page.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId== EditorInfo.IME_ACTION_DONE){
+
+                    if (isInteger(v.getText().toString())&& (Integer.parseInt(v.getText().toString())>0)&&(Integer.parseInt(v.getText().toString())<=reportQuertPage)){
+                   progressBar.setVisibility(View.VISIBLE);
+                    reportPage.setText(v.getText());
+                    int page=Integer.parseInt(v.getText().toString());
+                    listView.setAdapter(null);
+                    mReport_list.clear();
+                    if ((page*100)<=Integer.parseInt(reportcount.getText().toString())) {
+                        for (int i=0;i<100;i++){
+                            mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                        }
+                    }else{
+                        int n=Integer.parseInt(reportcount.getText().toString());
+                        int m=n-(page-1)*100;
+                        for(int i=0;i<m;i++){
+                            mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                        }
+                    }
+                    DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport_list, mContext);
+                    listView.setAdapter(DXAdapterMReport);
+                    progressBar.setVisibility(View.GONE);
+                    mSwipe.setRefreshing(false);
+                    report_page.clearFocus();
+                    //输入法处理
+                    InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    boolean isOpen = imm.isActive();
+                    if (isOpen) {
+                        imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
+                }
+                }
+                return false;
+            }
+        });
+
+
         report_page.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -385,23 +440,8 @@ public class ReportActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (isInteger((String)s.toString())){
-                    int reportpage=Integer.parseInt((String)s.toString());
-                    int deviceID= myApplication.getInstance().getRegID();
-                    int regID=myApplication.getInstance().getRegID();
-                    int valueType=myApplication.getInstance().getValuetype();
-                    progressBar.setVisibility(View.VISIBLE);
-                    readRegValue(deviceID,regID,reportpage,valueType,myApplication.getInstance().getQuerytime());
-                    report_page.clearFocus();
-                    //输入法处理
-                    InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
-                    boolean isOpen = imm.isActive();
-                    if (isOpen) {
-                        imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                    }
-                }
 
-            }
+           }
         });
         /********************************************/
 
@@ -412,9 +452,44 @@ public class ReportActivity extends BaseActivity {
         alarm_next_page.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInteger((String)report_page.getHint())){
-                    int reportpage=Integer.parseInt((String)report_page.getHint())+1;
-                    report_page.setText(String.valueOf(reportpage));
+                if (isInteger(reportPage.getText().toString())){
+                    int alarepage=Integer.parseInt(reportPage.getText().toString())+1;
+                        if ((alarepage>0)&&(alarepage<=reportQuertPage)){
+                            progressBar.setVisibility(View.VISIBLE);
+                            reportPage.setText(String.valueOf(alarepage));
+                            int page=alarepage;
+                            listView.setAdapter(null);
+                            mReport_list.clear();
+                            if ((page*100)<=Integer.parseInt(reportcount.getText().toString())) {
+                                for (int i=0;i<100;i++){
+                                    mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                                }
+                            }else{
+                                int n=Integer.parseInt(reportcount.getText().toString());
+                                int m=n-(page-1)*100;
+                                for(int i=0;i<m;i++){
+                                    mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                                }
+                            }
+                            DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport_list, mContext);
+                            listView.setAdapter(DXAdapterMReport);
+                            progressBar.setVisibility(View.GONE);
+                            mSwipe.setRefreshing(false);
+                            report_page.clearFocus();
+                            //输入法处理
+                            InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                            boolean isOpen = imm.isActive();
+                            if (isOpen) {
+                                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                            }
+                        }
+
+                    else{
+                        Toast mytoast=Toast.makeText(ReportActivity.this,"已到最后一页",Toast.LENGTH_LONG);
+                        mytoast.setGravity(Gravity.CENTER,0,190);
+                        mytoast.show();
+                        reportPage.setText(String.valueOf(reportQuertPage));
+                    }
                 }
 
             }
@@ -429,16 +504,45 @@ public class ReportActivity extends BaseActivity {
         alarm_previous_page.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInteger((String)report_page.getHint())){
-                    int alarepage=Integer.parseInt((String)report_page.getHint())-1;
+
+                if (isInteger(reportPage.getText().toString())){
+                    int alarepage=Integer.parseInt(reportPage.getText().toString())-1;
                     if (alarepage>=1) {
-                        report_page.setText(String.valueOf(alarepage));
+                        if ((alarepage>0)&&(alarepage<=reportQuertPage)){
+                            progressBar.setVisibility(View.VISIBLE);
+                            reportPage.setText(String.valueOf(alarepage));
+                            int page=alarepage;
+                            listView.setAdapter(null);
+                            mReport_list.clear();
+                            if ((page*100)<=Integer.parseInt(reportcount.getText().toString())) {
+                                for (int i=0;i<100;i++){
+                                    mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                                }
+                            }else{
+                                int n=Integer.parseInt(reportcount.getText().toString());
+                                int m=n-(page-1)*100;
+                                for(int i=0;i<m;i++){
+                                    mReport_list.add(new DX_Device_mReport(mReport.get((page-1)*100+i).getReportTime(),mReport.get((page-1)*100+i).getReportValue()));
+                                }
+                            }
+                            DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport_list, mContext);
+                            listView.setAdapter(DXAdapterMReport);
+                            progressBar.setVisibility(View.GONE);
+                            mSwipe.setRefreshing(false);
+                            report_page.clearFocus();
+                            //输入法处理
+                            InputMethodManager imm = (InputMethodManager) getApplication().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                            boolean isOpen = imm.isActive();
+                            if (isOpen) {
+                                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                            }
+                        }
                     }
                     else{
                         Toast mytoast=Toast.makeText(ReportActivity.this,"已到第一页",Toast.LENGTH_LONG);
                         mytoast.setGravity(Gravity.CENTER,0,190);
                         mytoast.show();
-                        report_page.setHint("1");
+                        reportPage.setText("1");
                     }
                 }
 
@@ -464,6 +568,26 @@ public class ReportActivity extends BaseActivity {
         /****************************************/
 
 
+        /**
+         * EditText焦点监听事件
+         */
+        reportPage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus) {
+                    reportPage.setText(null);
+                }
+            }
+        });
+
+
+        report_querytext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(ReportActivity.this,Main4Activity.class);
+                startActivity(intent);
+            }
+        });
 
 
     }
@@ -534,15 +658,25 @@ public class ReportActivity extends BaseActivity {
                     RemoveWatchDog(handler,runnable);
                     break;
                 case READ_FINISH:
-                    int value=msg.arg1/100;
+                    reportQuertPage=msg.arg1/100;
                     int remainder=msg.arg1 % 100;
                     if (remainder>0){
-                        value=value+1;
+                        reportQuertPage= reportQuertPage+1;
                     }
                     reportcount.setText(String.valueOf(msg.arg1));
-                    reportToatlPage.setText(String.valueOf(value));
+                    reportToatlPage.setText(String.valueOf( reportQuertPage));
                     reportPage.setText(String.valueOf(1));
-                    DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport, mContext);
+                    if ( reportQuertPage>2) {
+                    for (int i=0;i<100;i++){
+                        mReport_list.add(new DX_Device_mReport(mReport.get(i).getReportTime(),mReport.get(i).getReportValue()));
+                    }
+                    }else
+                    {
+                        for (int i=0;i<msg.arg1;i++){
+                            mReport_list.add(new DX_Device_mReport(mReport.get(i).getReportTime(),mReport.get(i).getReportValue()));
+                        }
+                    }
+                    DXAdapterMReport = new DXDeviceMReportAdapter((ArrayList<DX_Device_mReport>) mReport_list, mContext);
                     listView.setAdapter(DXAdapterMReport);
                     progressBar.setVisibility(View.GONE);
                     mSwipe.setRefreshing(false);
@@ -731,8 +865,12 @@ public class ReportActivity extends BaseActivity {
 
     /**
      *
-     * test
-     * test
+     * @param deviceID
+     * @param regID
+     * @param reportPage
+     * @param valuetype
+     * @param reportQueryTime
+     * @param rcode
      */
     private void readRegValue1(int deviceID, int regID, int reportPage, int valuetype, String reportQueryTime, final int rcode) {
         String webAddr = null;
@@ -803,16 +941,22 @@ public class ReportActivity extends BaseActivity {
         reportToatlPage.setText(jsonArray1.getString("pageCount"));
         reportcount.setText(String.valueOf(jsonArray1.getString("total")));
         if (Integer.parseInt((String) reportToatlPage.getText())==0){
-            reportPage.setHint("0");
+            reportPage.setText("0");
             Toast mytoast=Toast.makeText(ReportActivity.this,"在查询日期范围无数据！",Toast.LENGTH_LONG);
             mytoast.setGravity(Gravity.CENTER,0,190);
             mytoast.show();
         }
         else{
-            reportPage.setHint(jsonArray1.getString("page"));
+            reportPage.setText(jsonArray1.getString("page"));
+        }
+
+        for(int i=mDataReport.size()-1;i>=0;i--){
+            mfDataReport.add(new DX_Device_Report(mDataReport.get(i).getReportTime(),mDataReport.get(i).getReportValue()));
         }
        listView.setAdapter(null);
-       DXAdapterReport = new DXDeviceReportAdapter((ArrayList<DX_Device_Report>) mDataReport, mContext);
+
+       DXAdapterReport = new DXDeviceReportAdapter((ArrayList<DX_Device_Report>) mfDataReport, mContext);
+
         listView.setAdapter(DXAdapterReport);
 
 
@@ -869,15 +1013,16 @@ public class ReportActivity extends BaseActivity {
 
     @Override
     public void onResume() {
-        if(myApplication.getInstance().getQuerytime()!=null) {
-            reportQueryTimeShow = "日期范围:"+myApplication.getInstance().getQuerytime().substring(5, 15) + "至" +
-                    myApplication.getInstance().getQuerytime().substring(30, 40);
-            report_querytext.setText(reportQueryTimeShow);
-        }
-        //listView.setAdapter(null);
+
+
         super.onResume();
     }
 
+    /**
+     * 判断是否为整数
+     * @param str
+     * @return
+     */
     //判断是否为整型数
     private boolean isInteger(String str) {
         if (null == str || "".equals(str)) {
@@ -909,6 +1054,13 @@ public class ReportActivity extends BaseActivity {
         handler.removeCallbacksAndMessages(runnable);
     }
 
+    /**
+     * 整数转换浮点数形式
+     * @param HValue
+     * @param LValue
+     * @return
+     */
+
     private static float intToFloat(int HValue,int LValue){
         String Hhex= Integer.toHexString(HValue);
         String Lhex=Integer.toHexString(LValue);
@@ -939,6 +1091,12 @@ public class ReportActivity extends BaseActivity {
         return rv;
     }
 
+    /**
+     * 处理从云端取回的时间值
+     * @param containTimeString
+     * @return
+     */
+
     private  String TimeExtract(String containTimeString){
              String str1=containTimeString.substring(0,10);
              String str2=containTimeString.substring(11,19);
@@ -948,17 +1106,38 @@ public class ReportActivity extends BaseActivity {
 
     protected void onStart() {
         super.onStart();
+
+        listView.setAdapter(null);
+        mDataReport.clear();
+        mDataReport1.clear();
+        mReport.clear();
+        reportcount.setText(null);
+        reportPage.setText(null);
+        reportToatlPage.setText(null);
+
         final int deviceID = myApplication.getInstance().getDeviceID();
         final int regID = myApplication.getInstance().getRegID();
         int valueType = myApplication.getInstance().getValuetype();
+
         progressBar.setVisibility(View.VISIBLE);
+
+
+        if(myApplication.getInstance().getQuerytime()!=null) {
+            reportQueryTimeShow = "日期范围:"+myApplication.getInstance().getQuerytime().substring(5, 15) + "至" +
+                    myApplication.getInstance().getQuerytime().substring(30, 40);
+            report_querytext.setText(reportQueryTimeShow);
+            queryTime=myApplication.getInstance().getQuerytime();
+        }else{
+             queryTime=null;
+        }
+        listView.setAdapter(null);
 
 
         //定义线程定时器
 
         if (valueType == 0) {
             countDownLatch = new CountDownLatch(1);
-            readRegValue(deviceID, regID, 1, valueType, null);
+            readRegValue(deviceID, regID, 1, valueType, queryTime);
         } else {
             countDownLatch = new CountDownLatch(2);
             countDownLatch3 = new CountDownLatch(2);
@@ -966,10 +1145,11 @@ public class ReportActivity extends BaseActivity {
             /**
              * 线程1读取第一个地址的页数
              */
+            final String finalQueryTime = queryTime;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    readRegValue1(deviceID, regID, 1, 0, null, 1);
+                    readRegValue1(deviceID, regID, 1, 0, finalQueryTime, 1);
 
                 }
             }).start();
@@ -978,12 +1158,13 @@ public class ReportActivity extends BaseActivity {
              * 线程2读取第二个地址的页数
              */
 
+            final String finalQueryTime1 = queryTime;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         Thread.sleep(1000);
-                        readRegValue1(deviceID, regID + 1, 1, 0, null, 2);
+                        readRegValue1(deviceID, regID + 1, 1, 0, finalQueryTime1, 2);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -995,6 +1176,7 @@ public class ReportActivity extends BaseActivity {
             /**
              * 线程3读取第一个地址的数据
              */
+            final String finalQueryTime2 = queryTime;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -1003,7 +1185,7 @@ public class ReportActivity extends BaseActivity {
                         countDownLatch.await();
                         for (int i = 1; i <= pa[0]; i++) {
                             countDownLatch1 = new CountDownLatch(1);
-                            readRegValue1(deviceID, regID, i, 0, null, 3);
+                            readRegValue1(deviceID, regID, i, 0, finalQueryTime2, 3);
                             countDownLatch1.await();
                         }
                     } catch (InterruptedException e) {
@@ -1017,6 +1199,7 @@ public class ReportActivity extends BaseActivity {
             /**
              * 线程4读取第二个地址的数据
              */
+            final String finalQueryTime3 = queryTime;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -1026,7 +1209,7 @@ public class ReportActivity extends BaseActivity {
                         Thread.sleep(1000);
                         for (int i = 1; i <= pa[1]; i++) {
                             countDownLatch2 = new CountDownLatch(1);
-                            readRegValue1(deviceID, regID + 1, i, 0, null, 4);
+                            readRegValue1(deviceID, regID + 1, i, 0, finalQueryTime3, 4);
                             countDownLatch2.await();
                             Thread.sleep(1000);
                         }
@@ -1116,4 +1299,8 @@ public class ReportActivity extends BaseActivity {
 
     }
 
+    @Override
+    public void onClick(View v) {
+
+    }
 }
